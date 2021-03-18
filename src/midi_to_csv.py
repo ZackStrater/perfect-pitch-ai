@@ -5,7 +5,7 @@ import sys
 pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
-np.set_printoptions(threshold=np.inf)
+#np.set_printoptions(threshold=np.inf)
 
 csv_string = pm.midi_to_csv('../data/test_midi_csv.midi')
 
@@ -69,24 +69,69 @@ def write_midi_line(track, tick, control, channel, control_num, velocity):
     midi_string += '\n'
     return midi_string
 
-print(meta_data)
-print(write_midi_line(2, 447165, 'Control_c', 0, 64, 0))
-print(track_end)
+# print(meta_data)
+# print(write_midi_line(2, 447165, 'Control_c', 0, 64, 0))
+# print(track_end)
 
-midi_out = []
-for line in meta_data:
-    midi_out.append(line)
-midi_out.append(write_midi_line(2, 0, 'Note_on_c', 0, 50, 60))
-midi_out.append(write_midi_line(2, 1000, 'Note_on_c', 0, 50, 0))
-midi_out.append(write_midi_line(2, 1000, 'Note_on_c', 0, 52, 60))
-midi_out.append(write_midi_line(2, 2000, 'Note_on_c', 0, 52, 0))
-midi_out.append(write_midi_line(2, 2000, 'Note_on_c', 0, 53, 60))
-midi_out.append(write_midi_line(2, 3000, 'Note_on_c', 0, 53, 0))
-for line in track_end:
-    midi_out.append(line)
-print(midi_out)
+# x, y = np.nonzero(midi_note_array)
+# print(x)
+# print(y)
+# print(y.shape)
 
-midi_object = pm.csv_to_midi(midi_out)
-with open('../data/testing_midi_io.mid', 'wb') as output_file:
-    midi_writer = pm.FileWriter(output_file)
-    midi_writer.write(midi_object)
+
+def zero_runs(a):
+    # Create an array that is 1 where a is 0, and pad each end with an extra 0.
+    iszero = np.concatenate(([0], np.equal(a, 0).view(np.int8), [0]))
+    absdiff = np.abs(np.diff(iszero))
+    # Runs start and end where absdiff is 1.
+    ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
+    return ranges
+
+print('\n\n\n\n\n\n')
+
+def find_runs(x):
+    n = x.shape[0]
+    loc_run_start = np.empty(n, dtype=bool)
+    loc_run_start[0] = True
+
+    np.not_equal(x[:-1], x[1:], out=loc_run_start[1:])
+    run_starts = np.nonzero(loc_run_start)[0]
+
+    # find run values
+    run_values = x[loc_run_start]
+
+    # find run lengths
+    run_lengths = np.diff(np.append(run_starts, n))
+
+    notes_mask = run_values != 0
+    note_starts = run_starts[notes_mask]
+    note_lengths = run_lengths[notes_mask]
+    note_velocities = run_values[notes_mask]
+
+    return note_starts, note_lengths, note_velocities
+
+print('\n\n\n\n\n\n')
+
+print(find_runs(midi_note_array[55]))
+print(midi_note_array[55, 73381:(73381+67)])
+
+
+
+
+# midi_out = []
+# for line in meta_data:
+#     midi_out.append(line)
+# midi_out.append(write_midi_line(2, 0, 'Note_on_c', 0, 50, 60))
+# midi_out.append(write_midi_line(2, 1000, 'Note_on_c', 0, 50, 0))
+# midi_out.append(write_midi_line(2, 1000, 'Note_on_c', 0, 52, 60))
+# midi_out.append(write_midi_line(2, 2000, 'Note_on_c', 0, 52, 0))
+# midi_out.append(write_midi_line(2, 2000, 'Note_on_c', 0, 53, 60))
+# midi_out.append(write_midi_line(2, 3000, 'Note_on_c', 0, 53, 0))
+# for line in track_end:
+#     midi_out.append(line)
+# print(midi_out)
+#
+# midi_object = pm.csv_to_midi(midi_out)
+# with open('../data/testing_midi_io.mid', 'wb') as output_file:
+#     midi_writer = pm.FileWriter(output_file)
+#     midi_writer.write(midi_object)
