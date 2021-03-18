@@ -64,7 +64,29 @@ for idx, row in df_note_durations.iterrows():
     map_note(midi_note_array, row['control_num'], row['start_tick'], row['end_tick'], row['velocity'])
 
 
-
+def write_midi_line(track, tick, control, channel, control_num, velocity):
+    midi_string = ', '.join([str(track), str(tick), str(control), str(channel), str(control_num), str(velocity)])
+    midi_string += '\n'
+    return midi_string
 
 print(meta_data)
+print(write_midi_line(2, 447165, 'Control_c', 0, 64, 0))
 print(track_end)
+
+midi_out = []
+for line in meta_data:
+    midi_out.append(line)
+midi_out.append(write_midi_line(2, 0, 'Note_on_c', 0, 50, 60))
+midi_out.append(write_midi_line(2, 1000, 'Note_on_c', 0, 50, 0))
+midi_out.append(write_midi_line(2, 1000, 'Note_on_c', 0, 52, 60))
+midi_out.append(write_midi_line(2, 2000, 'Note_on_c', 0, 52, 0))
+midi_out.append(write_midi_line(2, 2000, 'Note_on_c', 0, 53, 60))
+midi_out.append(write_midi_line(2, 3000, 'Note_on_c', 0, 53, 0))
+for line in track_end:
+    midi_out.append(line)
+print(midi_out)
+
+midi_object = pm.csv_to_midi(midi_out)
+with open('../data/testing_midi_io.mid', 'wb') as output_file:
+    midi_writer = pm.FileWriter(output_file)
+    midi_writer.write(midi_object)
