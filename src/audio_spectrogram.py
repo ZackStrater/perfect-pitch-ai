@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import librosa.display
 
-x, sr = librosa.load('marhaban2.wav', sr=44100)
+x, sr = librosa.load('../data/test_aduio.wav', sr=None)
 # x is series with amplitude at each sample
 # sr is number of samples
 
@@ -38,9 +38,9 @@ import numpy as np
 A, B = np.meshgrid(df2.index, df2.columns)
 
 
-C = df2.values
-print(A.shape, B.shape, C.T.shape)
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(A, B, C.T, cmap=cm.coolwarm)
+# C = df2.values
+# print(A.shape, B.shape, C.T.shape)
+# fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+# ax.plot_surface(A, B, C.T, cmap=cm.coolwarm)
 plt.show()
