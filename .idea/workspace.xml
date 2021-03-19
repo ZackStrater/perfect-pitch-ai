@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1d76b72-71e8-411f-8802-e78330e088ef" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/midi_to_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/midi_to_csv.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
