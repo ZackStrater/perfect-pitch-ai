@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import librosa.display
 import numpy as np
 
-x, sr = librosa.load('../data/test_aduio.wav', sr=400000)
+x, sr = librosa.load('../data/test_aduio.wav', sr=100000)
 print(sr)
 # x is series with amplitude at each sample
 # sr is number of samples
