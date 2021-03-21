@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import librosa.display
 import numpy as np
 
-x, sr = librosa.load('../data/test_aduio.wav', sr=None)
+x, sr = librosa.load('../data/test_aduio.wav', sr=95750)
 print(sr)
 # x is series with amplitude at each sample
 # sr is number of samples
@@ -20,8 +20,10 @@ df = pd.DataFrame(x, columns=['amplitude'])
 
 
 # fourier transform, returns matrix with magnitude of each frequency bin (rows) for each sample
-X = librosa.stft(x, hop_length=63)
+X = librosa.stft(x)
 #  https://stackoverflow.com/questions/37963042/python-librosa-what-is-the-default-frame-size-used-to-compute-the-mfcc-feature
+# need to figure out how to convert frames to midi ticks
+# can use combination of hop_length and sample rate (on librosa.load) to get right number of ticks
 
 
 # converts amplitude to db at each time point, using np.max to place 0 db
