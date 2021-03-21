@@ -40,7 +40,7 @@
       <recent name="$PROJECT_DIR$/data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.midi_to_csv">
+  <component name="RunManager" selected="Python.audio_spectrogram">
     <configuration name="audio_spectrogram" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="audio-to-midi" />
       <option name="INTERPRETER_OPTIONS" value="" />

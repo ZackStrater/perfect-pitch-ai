@@ -13,16 +13,16 @@ df = pd.DataFrame(x, columns=['amplitude'])
 
 # index is sample number, convert to time in seconds by taking inverse
 # and multiplying by the sample number
-df.index = [(1/sr)*i for i in range(len(df.index))]
-df.reset_index(inplace=True)
-df = df.rename(columns = {'index':'time'})
-df.plot.line(x='time', y='amplitude')
+# df.index = [(1/sr)*i for i in range(len(df.index))]
+# df.reset_index(inplace=True)
+# df = df.rename(columns = {'index':'time'})
+# df.plot.line(x='time', y='amplitude')
 
 
 # fourier transform, returns matrix with magnitude of each frequency bin (rows) for each sample
-X = librosa.stft(x)
-print(X)
-print(X.shape)
+X = librosa.stft(x, hop_length=63)
+#  https://stackoverflow.com/questions/37963042/python-librosa-what-is-the-default-frame-size-used-to-compute-the-mfcc-feature
+
 
 # converts amplitude to db at each time point, using np.max to place 0 db
 Xdb = librosa.amplitude_to_db(abs(X))
@@ -34,9 +34,9 @@ print(Xdb)
 print(df2.shape)
 print(df2)
 
-plt.figure(figsize=(14, 5))
-librosa.display.specshow(Xdb, sr=sr, x_axis='time', y_axis='hz' )
-plt.colorbar()
+# plt.figure(figsize=(14, 5))
+# librosa.display.specshow(Xdb, sr=sr, x_axis='time', y_axis='mel' )
+# plt.colorbar()
 
 
 from mpl_toolkits.mplot3d import Axes3D

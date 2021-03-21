@@ -36,8 +36,8 @@ microsec_per_tick = microsec_per_quarter / ticks_per_quarter
 seconds_per_tick = microsec_per_tick / 1000000
 df['time'] = df['tick']*seconds_per_tick
 
-# empty numpy array where rows are individual keys on a piano, columns are equal to total ticks in the song
-song_total_ticks = df['tick'].iloc[-1]
+# empty numpy array where rows are individual keys on a piano, columns are equal to total ticks in the song from track_end
+song_total_ticks = int(track_end[0].split(', ')[1])
 notes = 127
 midi_note_array = np.zeros((127, song_total_ticks))
 
@@ -177,13 +177,9 @@ for line in sorted_all_midi_actions:
 for line in track_end:
     midi_out.append(line)
 
-print(midi_out[0:100])
-print('\n\n')
-print(csv_string[0:100])
-
 
 midi_object = pm.csv_to_midi(midi_out)
 with open('../data/testing_midi_io.mid', 'wb') as output_file:
     midi_writer = pm.FileWriter(output_file)
     midi_writer.write(midi_object)
-#
+
