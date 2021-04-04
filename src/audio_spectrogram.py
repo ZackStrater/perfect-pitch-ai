@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 import librosa.display
 import numpy as np
 
-x, sr = librosa.load('../data/test_aduio.wav', sr=100000)
+x, sr = librosa.load('../data/test_aduio.wav', sr=None)
 print(sr)
 # x is series with amplitude at each sample
 # sr is number of samples
 
 df = pd.DataFrame(x, columns=['amplitude'])
+print(df.shape)
 
 # index is sample number, convert to time in seconds by taking inverse
 # and multiplying by the sample number
@@ -36,9 +37,9 @@ print(Xdb)
 print(df2.shape)
 print(df2)
 
-# plt.figure(figsize=(14, 5))
-# librosa.display.specshow(Xdb, sr=sr, x_axis='time', y_axis='mel' )
-# plt.colorbar()
+plt.figure(figsize=(14, 5))
+librosa.display.specshow(Xdb, sr=sr, x_axis='time', y_axis='mel' )
+plt.colorbar()
 
 
 from mpl_toolkits.mplot3d import Axes3D
