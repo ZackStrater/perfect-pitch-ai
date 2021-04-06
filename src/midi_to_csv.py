@@ -9,6 +9,8 @@ np.set_printoptions(suppress=True)
 #np.set_printoptions(threshold=np.inf)
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set_theme()
+from scipy.ndimage import zoom
+
 
 
 # import midi file, result is a list of strings that contain midi actions
@@ -113,14 +115,19 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
     def extend_notes_in_row(array_slice_row):
         # get indexes where there are 0's
         zeros_arg = np.argwhere(array_slice_row == 0)
-        zeros_index = np.squeeze(zeros_arg)
+        zeros_index = zeros_arg.flatten()
         # find consecutive runs of 0's
-        zeros_runs = consecutive(zeros_index)
+        zeros_runs = consecutive(zeros_index)  # TODO might need an if statement here
+        print(f'zeros runs: \n{zeros_runs}')
         # get start and ends of runs of 0's as list of tuples
         zeros_slices = [(arr[0], arr[-1]) for arr in zeros_runs]
+        print(f'zeros slices: \n{zeros_slices}')
         # if first slice is at the beginning, ignore it
         if zeros_slices[0][0] == 0:
             zeros_slices.pop(0)
+        print(f'zeros slices: \n{zeros_slices}')
+        if not zeros_slices:
+            return
         for slice in zeros_slices:
             # assign value that came directly before slice to that slice
             array_slice_row[slice[0]: slice[1] + 1] = array_slice_row[slice[0] - 1]
@@ -134,6 +141,10 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
     midi_slice_with_sus = np.apply_along_axis(extend_notes_in_row, 1, midi_slice)
     midi_note_array[:, start_tick: end_tick] = midi_slice_with_sus
 
+#todo
+# applying suspedal func to durations when the sus pedal is pressed
+# for duration in sus_pedal_press_tick_durations:
+#     apply_sus_to_slice(duration[0], duration[1], midi_note_array)
 
 
 # midi_sus_array = np.zeros((1, song_total_ticks))
@@ -162,6 +173,9 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
 # ax = sns.heatmap(midi_note_array, linewidths=0)
 # plt.show()
 
+print(midi_note_array.shape)
+resized_midi_note_array = zoom(midi_note_array, (1, 0.12228344731), order=0)
+print(resized_midi_note_array.shape)
 
 ''' 
 decoding numpy midi array
@@ -194,7 +208,7 @@ def find_runs(x, row_index):
 
 
 # gathering note presses for each row (note) in midi array in order
-note_presses_and_releases = np.vstack([find_runs(row, idx) for idx, row in enumerate(midi_note_array)])
+note_presses_and_releases = np.vstack([find_runs(row, idx) for idx, row in enumerate(resized_midi_note_array)])
 
 
 # remove actions where the start tick and velocity are both 0
@@ -222,7 +236,11 @@ def write_midi_line(track, tick, control, channel, control_num, velocity):
 # recombining midi actions with metadata and end of file strings
 midi_out = []
 for line in meta_data:
-    midi_out.append(line)
+    if 'Tempo' in line:
+        new_line = '1, 0, Tempo, 4088860'
+        midi_out.append(new_line)
+    else:
+        midi_out.append(line)
 for line in sorted_note_presses_and_releases:
     if line[0] == 128:
         #                              track     tick   control  channel  control_num  velocity
@@ -235,7 +253,7 @@ for line in track_end:
 
 
 midi_object = pm.csv_to_midi(midi_out)
-with open('../data/testing_midi_io.mid', 'wb') as output_file:
+with open('../data/testing_zoom_midi_io.mid', 'wb') as output_file:
     midi_writer = pm.FileWriter(output_file)
     midi_writer.write(midi_object)
 

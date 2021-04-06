@@ -1,6 +1,7 @@
 
 import numpy as np
 import time
+from scipy.ndimage import zoom
 
 def consecutive(data):
     return np.split(data, np.where(np.diff(data) != 1)[0]+1)
@@ -23,7 +24,7 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
     def extend_notes_in_row(array_slice_row):
         # get indexes where there are 0's
         zeros_arg = np.argwhere(array_slice_row == 0)
-        zeros_index = np.squeeze(zeros_arg)
+        zeros_index = zeros_arg.flatten()
         # find consecutive runs of 0's
         zeros_runs = consecutive(zeros_index)  # TODO might need an if statement here
         # get start and ends of runs of 0's as list of tuples
@@ -54,34 +55,7 @@ def check_nums(array):
                 counter += 1
     return counter
 
-# print(check_nums(array))
-# arr2 = np.random.randint(2, size=(10**2, 10**1))
-# print(arr2[0:3, 0:10])
-# apply_sus_to_slice(0, arr2.shape[1] +1 , arr2)
-# print(arr2[0:3, 0:10])
 
-
-powers = [2, 3, 4, 5]
-for_loop_times = []
-numpy_times = []
-for p in powers:
-    arr = np.random.randint(2, size=(100, 10**p))
-    t0 = time.time()
-    check_nums(arr)
-    t1 = time.time()
-    for_loop_times.append(t1-t0)
-    print(arr.shape)
-
-    t2 = time.time()
-    print(arr[0:3, 0:10])
-    apply_sus_to_slice(0, array.shape[1], arr)
-    print(arr[0:3, 0:10])
-    t3 = time.time()
-    numpy_times.append(t3-t2)
-    print(t3-t2)
-
-    print('\n\n')
-
-print(powers)
-print(for_loop_times)
-print(numpy_times)
+resized_array = zoom(array, (1, 0.817), order=0)
+print(array)
+print(resized_array)
