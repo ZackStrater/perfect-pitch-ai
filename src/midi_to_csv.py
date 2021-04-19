@@ -10,7 +10,8 @@ np.set_printoptions(suppress=True)
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set_theme()
 from scipy.ndimage import zoom
-
+from PIL import Image
+import matplotlib.pyplot as plt
 
 
 # import midi file, result is a list of strings that contain midi actions
@@ -41,7 +42,7 @@ df['time'] = df['tick']*seconds_per_tick
 # empty numpy array where rows are individual keys on a piano, columns are equal to total ticks in the song from track_end
 song_total_ticks = int(track_end[0].split(', ')[1])
 notes = 127
-midi_note_array = np.zeros((127, song_total_ticks))
+midi_note_array = np.zeros((notes, song_total_ticks))
 
 # extracting just the note presses and releases
 mask = df['control'] == ' Note_on_c'
@@ -67,15 +68,58 @@ df_note_durations = pd.DataFrame({'start_tick': df_key_press['tick'], 'end_tick'
                                   'control_num': df_key_press['control_num'], 'velocity': df_key_press['velocity']})
 
 
-def map_note(array, note_value, note_start, note_end, velocity):
+def map_note(array, note_value, note_start, note_end, velocity, inverse=True):
     # maps midi notes onto the midi array
-    # numpy slice isn't inclusive of note_end,
-    # as mentioned above, this works b/c note end is the first moment the key is not longer pressed
-    array[note_value, note_start:note_end] = velocity
+    # numpy slice isn't inclusive of note_end, as mentioned above
+    # have to take abs of (127 - note_value) to make lower notes go to bottom, higher notes to top
+    # note value 0 is the lowest note, needs to go to last row (127)
+    # note value 127 is highest note, needs to go to first row (0)
+    if inverse:
+        # for midi note array
+        array[np.abs(127-note_value), note_start:note_end] = velocity
+    else:
+        # for sustain pedal array
+        array[note_value, note_start:note_end] = velocity
 
 # MIDI MATRIX W/O SUSTAIN PEDAL
 for idx, row in df_note_durations.iterrows():
     map_note(midi_note_array, row['control_num'], row['start_tick'], row['end_tick'], row['velocity'])
+
+
+
+
+
+def split_into_intervals(array, time_interval, sample_rate, hop_length=512):
+    # get sample ticks per time interval
+    ticks_per_interval = time_interval * sample_rate / hop_length
+    subarray_length = ticks_per_interval
+    print(f'subarray length {subarray_length}')
+
+    array_length = array.shape[1]
+    print(f'array length {array_length}')
+    # number of columns left over
+    last_interval_length = array_length % subarray_length
+    print(f'mod {last_interval_length}')
+    # how many columns to add to make another full interval
+    padding = subarray_length - last_interval_length
+    print(f'padding {padding}')
+    padded_array = np.pad(array, ((0, 0), (0, int(padding))))
+    padded_array_length = padded_array.shape[1]
+
+    num_intervals = padded_array_length / subarray_length
+    print(f'num intervals {num_intervals}')
+    # split array into subsections ultimately based on time_interval and sample_rate
+    split_arrays = np.array_split(padded_array, num_intervals, axis=1)
+    print(f'split array shape = {split_arrays[0].shape}')
+    print(len(split_arrays))
+    return split_arrays
+
+
+print(midi_note_array)
+print(midi_note_array.shape)
+split_arrays = split_into_intervals(midi_note_array, 8, 48000)
+
+
 
 '''Assigning midi pedal arrays'''
 # midi maps for pedal presses
@@ -101,10 +145,8 @@ df_sus_releases = df_sus[sus_release_indexes]
 df_sus_presses = df_sus[sus_press_indexes]
 assert df_sus_presses.shape[0] == df_sus_releases.shape[0]
 # MIDI tick durations where sustain pedal is pressed
-sus_pedal_press_tick_durations = zip(df_sus_presses['tick'], df_sus_releases['tick'])
 
-
-def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
+def apply_sus_to_slice(start_tick, end_tick, midi_note_array, buffer):
     # important to notive that end_tick is used instead of end_tick + 1
     # the end_tick is the first moment the pedal is released
     midi_slice = midi_note_array[:, start_tick: end_tick]
@@ -132,12 +174,14 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
                 zeros_slices.pop(0)
             for slice in zeros_slices:
                 # assign value that came directly before slice to that slice
-                array_slice_row[slice[0]: slice[1] + 1] = array_slice_row[slice[0] - 1]
+
+                '''the ':slice[1] - X' puts a buffer length between note and next note'''
+                array_slice_row[slice[0]: slice[1] - buffer] = array_slice_row[slice[0] - 1]
                 # if the assigned slice has the same value as the element directly following,
                 # assign the end element of the slice to 0 to differentiate the run with the following elements
                 # i.e 5, 5, 0, 0, 0, 5 . . . -> 5, 5, 5, 5, 0, 5 instead of 5, 5, 5, 5, 5, 5
-                if slice[1] + 1 < len(array_slice_row) and array_slice_row[slice[1]] == array_slice_row[slice[1] + 1]:
-                    array_slice_row[slice[1]] = 0
+                # if slice[1] + 1 < len(array_slice_row) and array_slice_row[slice[1]] == array_slice_row[slice[1] + 1]:
+                #     array_slice_row[slice[1]] = 0
             return array_slice_row
             # return altered input row
         else:
@@ -148,22 +192,35 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
     midi_note_array[:, start_tick: end_tick] = midi_slice_with_sus
     # apply to every row in array
 
-#todo
-# applying suspedal func to durations when the sus pedal is pressed
-# for duration in sus_pedal_press_tick_durations:
-#     apply_sus_to_slice(duration[0], duration[1], midi_note_array)
+plt.grid(b=None)
+plt.imshow(midi_note_array[:, 0:100000], aspect='auto')
+plt.show()
+# resized_midi_note_array = zoom(midi_note_array, (1, 0.12228344731), order=0)
+for start, end in zip(df_sus_presses['tick'], df_sus_releases['tick']):
+    apply_sus_to_slice(start, end, midi_note_array, 50)
+plt.grid(b=None)
+plt.imshow(midi_note_array[:, 0:100000], aspect='auto')
+plt.show()
+
+plt.grid(b=None)
+shrunk_midi_note_array = zoom(midi_note_array, (1, (1/8.177)), order=0)
+plt.imshow(shrunk_midi_note_array[:, 0:int(100000/8.177)], aspect='auto')
+plt.show()
 
 
-# midi_sus_array = np.zeros((1, song_total_ticks))
+midi_sus_array = np.zeros((1, song_total_ticks))
 
 # midi array for sus
-# for idx, row in df_sus.iterrows():
-#     # mapping pedal actions to midi_sus_array
-#     # note_value param is 0 because midi_sus_array only has one row
-#     map_note(midi_sus_array, 0, row['tick'], row['tick'] + int(row['duration']), row['velocity'])
-# # pedal is either on or off, so assign all on values to 60
-# midi_sus_array[midi_sus_array > 0] = 60
+for idx, row in df_sus.iterrows():
+    # mapping pedal actions to midi_sus_array
+    # note_value param is 0 because midi_sus_array only has one row
+    map_note(midi_sus_array, 0, row['tick'], row['tick'] + int(row['duration']), row['velocity'], inverse=False)
+# pedal is either on or off, so assign all on values to 60
+midi_sus_array[midi_sus_array > 0] = 60
 
+plt.grid(b=None)
+plt.imshow(midi_sus_array[:, 0:15000], aspect='auto')
+plt.show()
 
 # damper pedal
 # df_soft = df_pedals[df_pedals['control_num'] == 67].reset_index(drop=True)
@@ -181,87 +238,86 @@ def apply_sus_to_slice(start_tick, end_tick, midi_note_array):
 # plt.show()
 
 
-resized_midi_note_array = zoom(midi_note_array, (1, 0.12228344731), order=0)
-apply_sus_to_slice(0, -1, resized_midi_note_array)
-
 
 ''' 
 decoding numpy midi array
 '''
 
+def export_midi(midi_array, song_meta_data, tempo, path):
+    def find_runs(x, row_index):
+        # finds continuous segments of note presses and returns the value, start, length, and velocity for each note
 
-def find_runs(x, row_index):
-    # finds continuous segments of note presses and returns the value, start, length, and velocity for each note
+        n = x.shape[0]
+        loc_run_start = np.empty(n, dtype=bool)
+        loc_run_start[0] = True
 
-    n = x.shape[0]
-    loc_run_start = np.empty(n, dtype=bool)
-    loc_run_start[0] = True
+        np.not_equal(x[:-1], x[1:], out=loc_run_start[1:])
+        run_starts = np.nonzero(loc_run_start)[0]
 
-    np.not_equal(x[:-1], x[1:], out=loc_run_start[1:])
-    run_starts = np.nonzero(loc_run_start)[0]
+        # run_velocity -> take the value of first element in the run
+        run_velocities = x[loc_run_start]
 
-    # run_velocity -> take the value of first element in the run
-    run_velocities = x[loc_run_start]
+        # find run lengths, unused
+        run_lengths = np.diff(np.append(run_starts, n))
 
-    # find run lengths, unused
-    run_lengths = np.diff(np.append(run_starts, n))
+        # need to make a np array with note value (passed in as row_index) that is the same length as
+        # the number of notes found for that row
+        note_values = np.full(len(run_starts), row_index)
 
-    # need to make a np array with note value (passed in as row_index) that is the same length as
-    # the number of notes found for that row
-    note_values = np.full(len(run_starts), row_index)
-
-    # return array where each row has [note value, start of run, velocity of note]
-    # note value is what note was played, determined by row_index passed in
-    return np.dstack((note_values, run_starts, run_velocities))[0]
-
-
-# gathering note presses for each row (note) in midi array in order
-note_presses_and_releases = np.vstack([find_runs(row, idx) for idx, row in enumerate(resized_midi_note_array)])
+        # return array where each row has [note value, start of run, velocity of note]
+        # note value is what note was played, determined by row_index passed in
+        return np.dstack((note_values, run_starts, run_velocities))[0]
 
 
-# remove actions where the start tick and velocity are both 0
-# these are runs of 0's found at the beginning of the track for each note
-# if counted, it would include these as a note release for each note at the beginning of track, so they are excluded
-mask = (note_presses_and_releases[:, 1] == 0) & (note_presses_and_releases[:, 2] == 0)
-note_presses_and_releases = note_presses_and_releases[~mask]
-
-# IF YOU WANT TO COMBINE SUS PEDAL AND NOTE PRESSES:
-# sus_pedal_actions = np.vstack(find_runs(midi_sus_array[0], 128))
-# mask = (sus_pedal_actions[:, 1] == 0) & (sus_pedal_actions[:, 2] == 0)
-# sus_pedal_actions = sus_pedal_actions[~mask]
-# all_midi_actions = np.vstack([note_presses_and_releases, sus_pedal_actions])
-# sorted_all_midi_actions = all_midi_actions[all_midi_actions[:, 1].argsort()]
-
-#JUST NOTE PRESSES AND RELEASES:
-sorted_note_presses_and_releases = note_presses_and_releases[note_presses_and_releases[:, 1].argsort()]
-
-def write_midi_line(track, tick, control, channel, control_num, velocity):
-    midi_string = ', '.join([str(track), str(tick), str(control), str(channel), str(control_num), str(velocity)])
-    midi_string += '\n'
-    return midi_string
+    # gathering note presses for each row (note) in midi array in order
+    note_presses_and_releases = np.vstack([find_runs(row, idx) for idx, row in enumerate(midi_array)])
 
 
-# recombining midi actions with metadata and end of file strings
-midi_out = []
-for line in meta_data:
-    if 'Tempo' in line:
-        new_line = '1, 0, Tempo, 4088860'
-        midi_out.append(new_line)
-    else:
+    # remove actions where the start tick and velocity are both 0
+    # these are runs of 0's found at the beginning of the track for each note
+    # if counted, it would include these as a note release for each note at the beginning of track, so they are excluded
+    mask = (note_presses_and_releases[:, 1] == 0) & (note_presses_and_releases[:, 2] == 0)
+    note_presses_and_releases = note_presses_and_releases[~mask]
+
+    # IF YOU WANT TO COMBINE SUS PEDAL AND NOTE PRESSES:
+    # sus_pedal_actions = np.vstack(find_runs(midi_sus_array[0], 128))
+    # mask = (sus_pedal_actions[:, 1] == 0) & (sus_pedal_actions[:, 2] == 0)
+    # sus_pedal_actions = sus_pedal_actions[~mask]
+    # all_midi_actions = np.vstack([note_presses_and_releases, sus_pedal_actions])
+    # sorted_all_midi_actions = all_midi_actions[all_midi_actions[:, 1].argsort()]
+
+    #JUST NOTE PRESSES AND RELEASES:
+    sorted_note_presses_and_releases = note_presses_and_releases[note_presses_and_releases[:, 1].argsort()]
+
+    def write_midi_line(track, tick, control, channel, control_num, velocity):
+        midi_string = ', '.join([str(track), str(tick), str(control), str(channel), str(control_num), str(velocity)])
+        midi_string += '\n'
+        return midi_string
+
+
+    # recombining midi actions with metadata and end of file strings
+    midi_out = []
+    for line in song_meta_data:
+        if 'Tempo' in line:
+            # 4088860
+            new_line = f'1, 0, Tempo, {tempo}'
+            midi_out.append(new_line)
+        else:
+            midi_out.append(line)
+    for line in sorted_note_presses_and_releases:
+        if line[0] == 128:
+            #                              track     tick   control  channel  control_num  velocity
+            midi_out.append(write_midi_line(2, int(line[1]), 'Control_c', 0, 64, int(line[2])))
+        else:
+            #                              track     tick   control  channel  control_num  velocity
+            midi_out.append(write_midi_line(2, int(line[1]), 'Note_on_c', 0, int(line[0]), int(line[2])))
+    for line in track_end:
         midi_out.append(line)
-for line in sorted_note_presses_and_releases:
-    if line[0] == 128:
-        #                              track     tick   control  channel  control_num  velocity
-        midi_out.append(write_midi_line(2, int(line[1]), 'Control_c', 0, 64, int(line[2])))
-    else:
-        #                              track     tick   control  channel  control_num  velocity
-        midi_out.append(write_midi_line(2, int(line[1]), 'Note_on_c', 0, int(line[0]), int(line[2])))
-for line in track_end:
-    midi_out.append(line)
 
 
-midi_object = pm.csv_to_midi(midi_out)
-with open('../data/testing_zoom_midi_io.mid', 'wb') as output_file:
-    midi_writer = pm.FileWriter(output_file)
-    midi_writer.write(midi_object)
+    midi_object = pm.csv_to_midi(midi_out)
+    with open(path, 'wb') as output_file:
+        midi_writer = pm.FileWriter(output_file)
+        midi_writer.write(midi_object)
 
+export_midi(midi_note_array, meta_data, 500000, '../data/testing_flip.mid')

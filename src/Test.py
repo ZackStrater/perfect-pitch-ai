@@ -72,11 +72,42 @@ resized_array = zoom(array, (1, 0.817), order=0)
 # print(resized_array)
 
 
-new_arr = np.array([[ 8,  0,  0,  0,  0],
-                    [ 8, 32, 32, 32, 32],
-                     [ 8,  0,  0,  0,  0],
-                     [ 8,  0,  0,  0,  0]])
+def toy_split_into_intervals(array, sub_array_length):
+    array_length = array.shape[1]
+    print(array_length)
+    print(sub_array_length)
+    print(array_length//sub_array_length)
+    mod = array_length % sub_array_length
+    print(f'mod {mod}')
+    pad = sub_array_length - mod
+    print(f'pad {pad}')
+    padded_array = np.pad(array, ((0, 0), (0, pad)))
+    print(padded_array)
+    padded_array_length = padded_array.shape[1]
+    print(padded_array.shape[1])
+    num_intervals = padded_array_length/sub_array_length
+    split_arrays = np.array_split(padded_array, num_intervals, axis=1)
+    return split_arrays
 
-print(new_arr)
-apply_sus_to_slice(0, -1, new_arr)
-print(new_arr)
+
+test = toy_split_into_intervals(array, 9)
+print(test)
+
+def split_into_intervals(array, time_interval, sample_rate, hop_length=512):
+    # get sample ticks per time interval
+    ticks_per_interval = time_interval * sample_rate / hop_length
+    subarray_length = ticks_per_interval
+
+    array_length = array.shape[1]
+
+    # number of columns left over
+    last_interval_length = array_length % subarray_length
+    # how many columns to add to make another full interval
+    padding = subarray_length - last_interval_length
+    padded_array = np.pad(array, ((0, 0), (0, padding)))
+    padded_array_length = padded_array.shape[1]
+
+    num_intervals = padded_array_length/subarray_length
+    # split array into subsections ultimately based on time_interval and sample_rate
+    split_arrays = np.array_split(padded_array, num_intervals, axis=1)
+    return split_arrays
