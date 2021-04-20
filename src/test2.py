@@ -3,12 +3,12 @@ import py_midicsv as pm
 import librosa.display
 
 
-for filename in os.listdir('/media/zackstrater/New Volume/maestro-v3.0.0/2018'):
+for filename in os.listdir('/media/zackstrater/New Volume/maestro-v3.0.0/2017'):
     if filename.endswith(".midi"):
         # print(os.path.join(directory, filename))
         print(filename)
         # import midi file, result is a list of strings that contain midi actions
-        csv_string = pm.midi_to_csv(os.path.join('/media/zackstrater/New Volume/maestro-v3.0.0/2018', filename))
+        csv_string = pm.midi_to_csv(os.path.join('/media/zackstrater/New Volume/maestro-v3.0.0/2017', filename))
         meta_data = csv_string[0:7]
         track_end = csv_string[-2:]
         header = meta_data[0].split(',')
@@ -23,7 +23,7 @@ for filename in os.listdir('/media/zackstrater/New Volume/maestro-v3.0.0/2018'):
         print(f'PPQ: {ticks_per_quarter}')
     else:
         if filename.endswith(".wav"):
-            x, sr = librosa.load(os.path.join('/media/zackstrater/New Volume/maestro-v3.0.0/2018', filename), sr=None)
+            x, sr = librosa.load(os.path.join('/media/zackstrater/New Volume/maestro-v3.0.0/2017', filename), sr=None)
             print(sr)
 
 

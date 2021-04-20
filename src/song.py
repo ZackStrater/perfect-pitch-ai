@@ -51,25 +51,18 @@ class Song:
         # get sample ticks per time interval
         ticks_per_interval = time_interval * sample_rate / hop_length
         subarray_length = ticks_per_interval
-        print(f'subarray length {subarray_length}')
 
         array_length = array.shape[1]
-        print(f'array length {array_length}')
         # number of columns left over
         last_interval_length = array_length % subarray_length
-        print(f'mod {last_interval_length}')
         # how many columns to add to make another full interval
         padding = subarray_length - last_interval_length
-        print(f'padding {padding}')
         padded_array = np.pad(array, ((0, 0), (0, int(padding))))
         padded_array_length = padded_array.shape[1]
 
         num_intervals = padded_array_length / subarray_length
-        print(f'num intervals {num_intervals}')
         # split array into subsections ultimately based on time_interval and sample_rate
         split_arrays = np.array_split(padded_array, num_intervals, axis=1)
-        print(f'split array shape = {split_arrays[0].shape}')
-        print(len(split_arrays))
         return split_arrays
 
     def compare_arrays(self, array, array2):
@@ -182,7 +175,15 @@ class Song:
 
             df_sus_releases = df_sus[sus_release_indexes]
             df_sus_presses = df_sus[sus_press_indexes]
-            assert df_sus_presses.shape[0] == df_sus_releases.shape[0]
+
+            if df_sus_presses.shape[0] != df_sus_releases.shape[0]:
+                print('sustain pedal issue')
+                print(df_sus_presses.shape[0])
+                print(df_sus_releases.shape[0])
+                print(df_sus_releases)
+                print(df_sus_presses)
+                print(self.song_total_midi_ticks)
+            assert df_sus_presses.shape[0] == df_sus_releases.shape[0], 'assertion error sustain'
             # MIDI tick durations where sustain pedal is pressed
 
             for start, end in zip(df_sus_presses['tick'], df_sus_releases['tick']):
