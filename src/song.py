@@ -160,7 +160,7 @@ class Song:
             df_sus = df_pedals[df_pedals['control_num'] == 64].reset_index(drop=True)
             # find duration by tick length to next action
             df_sus['duration'] = np.abs(df_sus['tick'].diff(periods=-1))
-            # extend last action to end of song
+            # extend last action (usually releasing sus_pedal) to end of song
             df_sus.loc[df_sus.index[-1], 'duration'] = self.song_total_midi_ticks - df_sus.loc[df_sus.index[-1], 'tick']
 
             # pedal actions record variations in how far the sustain pedal is pressed (i.e. velocity of 20 vs 80)
