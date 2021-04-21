@@ -33,6 +33,9 @@ class Song:
         self.song_total_sample_ticks = self.db_spectrogram.shape[0]
         self.spectrogram_array_splits = None
 
+        self.mel_spectrogram = None
+
+
     '''HELPER FUNCTIONS'''
     def map_note(self, array, note_value, note_start, note_end, velocity, inverse=True):
         # maps midi notes onto the midi array
@@ -71,7 +74,7 @@ class Song:
         axs[1].imshow(array2, aspect='auto')
         plt.show()
 
-    def apply_sus_to_slice(self, start_tick, end_tick, midi_note_array, buffer=100):
+    def apply_sus_to_slice(self, start_tick, end_tick, midi_note_array, buffer=200):
         # important to notive that end_tick is used instead of end_tick + 1
         # the end_tick is the first moment the pedal is released
         midi_slice = midi_note_array[:, start_tick: end_tick]
@@ -243,7 +246,7 @@ class Song:
         self.db_spectrogram = vectorized_db_sigmoid(self.db_spectrogram)
 
     '''META FUNCTIONS'''
-    def split_audio_and_midi(self, time_interval):
+    def split_audio_and_midi_into_equal_partitions(self, time_interval):
         # split audio and downsampled  midi arrays into chunks based of length time_interval (in seconds)
         self.spectrogram_array_splits = self.split_into_intervals(self.db_spectrogram, time_interval, self.sample_rate)
         self.midi_note_array_splits = self.split_into_intervals(self.midi_note_array, time_interval, self.sample_rate)
@@ -257,9 +260,12 @@ class Song:
                 np.save(f, audio)
 
     def format_split_save_synced_midi_audio_files(self, midi_directory_path, audio_directory_path, filename='', time_interval=8, spectrogram_freq_ceiling=825,
-                                                  remove_high_frequencies=True, remove_velocity=True, remove_top_and_bottom_midi_notes=True,
+                                                  apply_sus=True, remove_high_frequencies=True, remove_velocity=True, remove_top_and_bottom_midi_notes=True,
                                                   downsample=True, apply_denoising=False, alpha=0.8, beta=-5, ):
-        self.populate_midi_note_array()
+        if apply_sus:
+            self.populate_midi_note_array()
+        else:
+            self.populate_midi_note_array(apply_sus=False)
         if remove_high_frequencies:
             self.remove_high_frequencies_from_spectrogram(frequency_ceiling=spectrogram_freq_ceiling)
         if remove_velocity:
@@ -270,9 +276,18 @@ class Song:
             self.apply_denoising_sigmoid(alpha, beta)
         if downsample:
             self.downsample_midi_note_array()
-        self.split_audio_and_midi(time_interval)
+        self.split_audio_and_midi_into_equal_partitions(time_interval)
         self.save_splits(midi_directory_path, audio_directory_path, filename=filename)
 
+
+    '''MEL SPECTROGRAM FORMATTING AND PROCESSING'''
+    def process_mel_spectrogram(self, n_mels):
+        mel_spectrogram = np.flipud(librosa.feature.melspectrogram(self.audio_waveform, sr=self.sample_rate, n_mels=n_mels))
+        log_mel_spectrogram = librosa.power_to_db(mel_spectrogram)
+        self.mel_spectrogram = log_mel_spectrogram
+
+    def sliding_window(self, array, ):
+        pass
 
 if __name__ == '__main__':
 
