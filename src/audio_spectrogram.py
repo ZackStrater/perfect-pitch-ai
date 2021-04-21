@@ -10,8 +10,13 @@ print(sr)
 # sr is number of samples
 
 
-mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=200)
+mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=128)
+print(mel_spectrogram)
 log_mel_sprectrogram = librosa.power_to_db(mel_spectrogram)
+norm_mel = log_mel_sprectrogram/80 + 1
+
+print(log_mel_sprectrogram)
+print(norm_mel)
 
 X = librosa.stft(y)
 Xdb = librosa.amplitude_to_db(abs(X))
@@ -23,6 +28,10 @@ plt.show()
 
 plt.grid(b=None)
 plt.imshow(np.flipud(log_mel_sprectrogram), aspect='auto', interpolation='nearest')
+plt.show()
+
+plt.grid(b=None)
+plt.imshow(np.flipud(norm_mel), aspect='auto', interpolation='nearest')
 plt.show()
 
 #

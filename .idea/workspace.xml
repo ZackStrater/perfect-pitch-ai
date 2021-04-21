@@ -2,7 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1d76b72-71e8-411f-8802-e78330e088ef" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/src/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/audio_spectrogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/audio_spectrogram.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cnn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/song.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/song.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/split_and_save_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/split_and_save_files.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/test2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +40,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../assignments/autoencoders" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">

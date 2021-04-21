@@ -93,10 +93,12 @@ class Song:
         split_arrays = np.array_split(padded_array, num_intervals, axis=1)
         return split_arrays
 
-    def compare_arrays(self, array, array2):
-        fig, axs = plt.subplots(1, 2, figsize=(20, 20))
-        axs[0].imshow(array, aspect='auto')
-        axs[1].imshow(array2, aspect='auto')
+    def compare_arrays(self, *arrays):
+        num_arrays = len(arrays)
+        fig, axs = plt.subplots(1, num_arrays, figsize=(5*num_arrays, 20))
+        for i in range(num_arrays):
+            print(arrays[i].shape)
+            axs[i].imshow(arrays[i], aspect='auto', interpolation='nearest')
         plt.show()
 
     def apply_sus_to_slice(self, start_tick, end_tick, midi_note_array, buffer=200):
@@ -257,17 +259,25 @@ class Song:
         plt.imshow(self.db_spectrogram, aspect='auto')
         plt.show()
 
+    def show_mel_spectrogram(self):
+        plt.imshow(self.mel_spectrogram, aspect='auto')
+        plt.show()
+
     def remove_high_frequencies_from_spectrogram(self, frequency_ceiling=825):
         self.db_spectrogram = self.db_spectrogram[frequency_ceiling:, :]
 
-    def apply_denoising_sigmoid(self, alpha=0.8, beta=-5):
+    def normalize_mel_spectrogram(self):
+        self.mel_spectrogram = self.mel_spectrogram/np.abs(np.min(self.mel_spectrogram)) + 1
+
+    def apply_denoising_sigmoid(self, audio_array, alpha=0.8, beta=-5):
         # db scale goes from ~-40 to 0, with 0 being the loudest
         # alpha affects the sloped of the sigmoid curve, beta centers it around a certain db value
         # alpha = 0.8, beta = -5 works well for denoising
         def db_sigmoid(x):
             return 1/(1 + np.exp(alpha*(-x-beta)))
         vectorized_db_sigmoid = np.vectorize(db_sigmoid)
-        self.db_spectrogram = vectorized_db_sigmoid(self.db_spectrogram)
+        pass
+        # TODO fix this
 
     '''META FUNCTIONS'''
     def split_audio_and_midi_into_equal_partitions(self, time_interval):
@@ -314,24 +324,35 @@ class Song:
         # TODO need to make it so you can input left and right buffer as seconds and calculate based on sample rate
         left_indices, right_indices, center_indices = self.get_window_indices(audio_array, stepsize, left_buffer, right_buffer)
         audio_windows = self.get_windows(audio_array, left_indices, right_indices)
-        midi_windows = self.get_windows(midi_array, left_indices, right_indices)
+        midi_windows = self.get_windows(midi_array, left_indices, right_indices) # TODO remove this at some point
         midi_slices = self.get_midi_slices(midi_array, center_indices)
         return audio_windows, midi_slices, midi_windows
 
-    def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename=''):
-        for i, (midi, audio) in enumerate(zip(self.midi_slices, self.mel_windows)):
-            with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
-                np.save(f, midi)
-            with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
-                np.save(f, audio)
+    def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename='', save_midi_windows=False, midi_window_directory_path=''):
+        if save_midi_windows:
+            for i, (midi_win, midi_slice, audio) in enumerate(zip(self.midi_windows, self.midi_slices, self.mel_windows)):
+                with open(f'{midi_directory_path}/{filename}_{i}_midi.npy', 'wb') as f:
+                    np.save(f, midi_slice)
+                with open(f'{audio_directory_path}/{filename}_{i}_audio.npy', 'wb') as f:
+                    np.save(f, audio)
+                with open(f'{midi_window_directory_path}/{filename}_{i}_mwin.npy', 'wb') as f:
+                    np.save(f, midi_win)
+        else:
+            for i, (midi, audio) in enumerate(zip(self.midi_slices, self.mel_windows)):
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
+                    np.save(f, midi)
+                with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
+                    np.save(f, audio)
+
 
     def process_audio_midi_save_slices(self,
                                        midi_directory_path, audio_directory_path, # path info
                                        n_mels, stepsize, left_buffer, right_buffer, # audio info
-                                       apply_denoising=False, alpha=0.8, beta=-5,
+                                       normalize_mel_spectrogram=True, apply_denoising=False, alpha=0.8, beta=-5,
                                        apply_sus=True, remove_velocity=True, # midi info
                                        convert_midi_to_pianoroll=True, downsample = True,
-                                       filename=''):
+                                       filename='', save=True, save_midi_windows=False, midi_window_directory_path=''):
+        # MIDI FUNCS
         if apply_sus:
             self.populate_midi_note_array()
         else:
@@ -340,13 +361,20 @@ class Song:
             self.remove_velocities_from_midi_note_array()
         if convert_midi_to_pianoroll:
             self.convert_midi_array_to_pianoroll()
-        if apply_denoising:
-            self.apply_denoising_sigmoid(alpha, beta)
         if downsample:
             self.downsample_midi_note_array()
+
+        # AUDIO FUNCS
         self.process_mel_spectrogram(n_mels)
+        if normalize_mel_spectrogram:
+            self.normalize_mel_spectrogram()
+        if apply_denoising:
+            self.apply_denoising_sigmoid(alpha, beta)
         self.mel_windows, self.midi_slices, self.midi_windows = self.get_audio_windows_and_midi_slices(self.mel_spectrogram, self.midi_note_array, stepsize, left_buffer, right_buffer)
-        self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename)
+        if save_midi_windows and save:
+            self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename, save_midi_windows=True, midi_window_directory_path=midi_window_directory_path)
+        elif save:
+            self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename)
 
 if __name__ == '__main__':
 
