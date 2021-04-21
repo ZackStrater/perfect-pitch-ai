@@ -34,7 +34,9 @@ class Song:
         self.spectrogram_array_splits = None
 
         self.mel_spectrogram = None
-
+        self.mel_windows = None
+        self.midi_windows = None
+        self.midi_slices = None
 
     '''HELPER FUNCTIONS'''
     def map_note(self, array, note_value, note_start, note_end, velocity, inverse=True):
@@ -49,6 +51,29 @@ class Song:
         else:
             # for sustain pedal array
             array[note_value, note_start:note_end] = velocity
+
+    def get_window_indices(self, array, stepsize, left_buffer, right_buffer):
+        array_len = array.shape[1]
+        first_sample = left_buffer
+        last_sample = array_len - right_buffer
+        center_indices = np.arange(first_sample, last_sample, stepsize)
+        def left_right_indices(center, left, right):
+            return center - left, center + right + 1
+        vec_left_right_indices = np.vectorize(left_right_indices)
+        left_indices, right_indices = vec_left_right_indices(center_indices, left_buffer, right_buffer)
+        return left_indices, right_indices, center_indices
+
+    def get_windows(self, array, left_indicies, right_indicies):
+        window_bin = []
+        for l, r in zip(left_indicies, right_indicies):
+            window_bin.append(array[:, l:r])
+        return window_bin
+
+    def get_midi_slices(self, array, center_indices):
+        midi_slice_bin = []
+        for c in center_indices:
+            midi_slice_bin.append(array[:, c])
+        return midi_slice_bin
 
     def split_into_intervals(self, array, time_interval, sample_rate, hop_length=512):
         # get sample ticks per time interval
@@ -204,9 +229,8 @@ class Song:
             # pedal is either on or off, so assign all on values to 60
             self.midi_sus_array[self.midi_sus_array > 0] = 60
 
-    def remove_top_and_bottom_midi_notes(self):
-        self.midi_note_array = self.midi_note_array[10:-17, :]
-
+    def convert_midi_array_to_pianoroll(self):
+        self.midi_note_array = self.midi_note_array[21:109, :]
 
     def downsample_midi_note_array(self):
         ratio = self.db_spectrogram.shape[1]/self.midi_note_array.shape[1]
@@ -260,8 +284,8 @@ class Song:
                 np.save(f, audio)
 
     def format_split_save_synced_midi_audio_files(self, midi_directory_path, audio_directory_path, filename='', time_interval=8, spectrogram_freq_ceiling=825,
-                                                  apply_sus=True, remove_high_frequencies=True, remove_velocity=True, remove_top_and_bottom_midi_notes=True,
-                                                  downsample=True, apply_denoising=False, alpha=0.8, beta=-5, ):
+                                                  apply_sus=True, remove_high_frequencies=True, remove_velocity=True, convert_midi_to_pianoroll=True,
+                                                  downsample=True, apply_denoising=False, alpha=0.8, beta=-5):
         if apply_sus:
             self.populate_midi_note_array()
         else:
@@ -270,8 +294,8 @@ class Song:
             self.remove_high_frequencies_from_spectrogram(frequency_ceiling=spectrogram_freq_ceiling)
         if remove_velocity:
             self.remove_velocities_from_midi_note_array()
-        if remove_top_and_bottom_midi_notes:
-            self.remove_top_and_bottom_midi_notes()
+        if convert_midi_to_pianoroll:
+            self.convert_midi_array_to_pianoroll()
         if apply_denoising:
             self.apply_denoising_sigmoid(alpha, beta)
         if downsample:
@@ -286,8 +310,43 @@ class Song:
         log_mel_spectrogram = librosa.power_to_db(mel_spectrogram)
         self.mel_spectrogram = log_mel_spectrogram
 
-    def sliding_window(self, array, ):
-        pass
+    def get_audio_windows_and_midi_slices(self, audio_array, midi_array, stepsize, left_buffer, right_buffer):
+        # TODO need to make it so you can input left and right buffer as seconds and calculate based on sample rate
+        left_indices, right_indices, center_indices = self.get_window_indices(audio_array, stepsize, left_buffer, right_buffer)
+        audio_windows = self.get_windows(audio_array, left_indices, right_indices)
+        midi_windows = self.get_windows(midi_array, left_indices, right_indices)
+        midi_slices = self.get_midi_slices(midi_array, center_indices)
+        return audio_windows, midi_slices, midi_windows
+
+    def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename=''):
+        for i, (midi, audio) in enumerate(zip(self.midi_slices, self.mel_windows)):
+            with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
+                np.save(f, midi)
+            with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
+                np.save(f, audio)
+
+    def process_audio_midi_save_slices(self,
+                                       midi_directory_path, audio_directory_path, # path info
+                                       n_mels, stepsize, left_buffer, right_buffer, # audio info
+                                       apply_denoising=False, alpha=0.8, beta=-5,
+                                       apply_sus=True, remove_velocity=True, # midi info
+                                       convert_midi_to_pianoroll=True, downsample = True,
+                                       filename=''):
+        if apply_sus:
+            self.populate_midi_note_array()
+        else:
+            self.populate_midi_note_array(apply_sus=False)
+        if remove_velocity:
+            self.remove_velocities_from_midi_note_array()
+        if convert_midi_to_pianoroll:
+            self.convert_midi_array_to_pianoroll()
+        if apply_denoising:
+            self.apply_denoising_sigmoid(alpha, beta)
+        if downsample:
+            self.downsample_midi_note_array()
+        self.process_mel_spectrogram(n_mels)
+        self.mel_windows, self.midi_slices, self.midi_windows = self.get_audio_windows_and_midi_slices(self.mel_spectrogram, self.midi_note_array, stepsize, left_buffer, right_buffer)
+        self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename)
 
 if __name__ == '__main__':
 

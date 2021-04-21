@@ -26,32 +26,41 @@ import librosa.display
 #             x, sr = librosa.load(os.path.join('/media/zackstrater/New Volume/maestro-v3.0.0/2008', filename), sr=None)
 #             print(sr)
 
+# import numpy as np
+# np. set_printoptions(threshold=np. inf)
+# np.set_printoptions(linewidth=100)
+# array = np.arange(240).reshape(10, 24)
+# print(array)
+# print('\n\n')
+#
+#
+# def windows(array, stepsize, left_buffer, right_buffer):
+#     array_len = array.shape[1]
+#     first_sample = left_buffer
+#     last_sample = array_len - right_buffer
+#     center_indexes = np.arange(first_sample, last_sample, stepsize)
+#     def left_right(center, left, right):
+#         return center-left, center+right + 1
+#     vlr = np.vectorize(left_right)
+#     output = vlr(center_indexes, left_buffer, right_buffer)
+#     print(center_indexes)
+#     return output
+#
+# def apply_window_index(array, lefts, rights):
+#     window_bin = []
+#     for l, r in zip(lefts, rights):
+#         window_bin.append(array[:, l:r])
+#     return window_bin
+#
+# L, R = windows(array, stepsize=3, left_buffer=5, right_buffer=2)
+# print(apply_window_index(array, L, R))
+
 import numpy as np
-np. set_printoptions(threshold=np. inf)
-np.set_printoptions(linewidth=100)
-array = np.arange(240).reshape(10, 24)
-print(array)
-print('\n\n')
-
-
-def windows(array, stepsize, left_buffer, right_buffer):
-    array_len = array.shape[1]
-    first_sample = left_buffer
-    last_Sample = array_len - right_buffer
-    center_indexes = np.arange(first_sample, last_Sample, stepsize)
-    def left_right(center, left, right):
-        return center-left, center+right + 1
-    vlr = np.vectorize(left_right)
-    output = vlr(center_indexes, left_buffer, right_buffer)
-    print(center_indexes)
-    return output
-
-def apply_window_index(array, lefts, rights):
-    window_bin = []
-    for l, r in zip(lefts, rights):
-        window_bin.append(array[:, l:r])
-    return window_bin
-
-L, R = windows(array, stepsize=3, left_buffer=5, right_buffer=2)
-print(apply_window_index(array, L, R))
-
+arr = np.arange(128)
+print(arr)
+arr = arr[21:109]
+print(arr)
+print(arr.shape)
+# array = np.arange(2560).reshape(128, -1)
+# print(array)
+# print(array.shape)
