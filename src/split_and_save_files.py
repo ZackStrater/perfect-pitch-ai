@@ -9,15 +9,15 @@ from termcolor import cprint
 
 midi_bin = []
 audio_bin = []
-directory_path = '/media/zackstrater/New Volume/maestro-v3.0.0/2018'
-# midi_out_path = '/media/zackstrater/New Volume/testing_png/midi_slices'
-# audio_out_path = '/media/zackstrater/New Volume/testing_png/audio_windows'
-# midi_win_out_path = '/media/zackstrater/New Volume/testing_png/midi_windows'
+directory_path = '/home/zackstrater/audio_midi_repository/2018'
+midi_out_path = '/home/zackstrater/audio_midi_repository/sus_128mels_100l_27r_step20/midi_slices'
+audio_out_path = '/home/zackstrater/audio_midi_repository/sus_128mels_100l_27r_step20/audio_windows'
+midi_win_out_path = '/home/zackstrater/audio_midi_repository/sus_128mels_100l_27r_step20/midi_windows'
 
-
-midi_out_path = '../data/midi_slices'
-audio_out_path = '../data/audio_windows'
-midi_win_out_path = '../data/midi_windows'
+# sus 128 mels 100l 27 right
+# midi_out_path = '../data/midi_slices'
+# audio_out_path = '../data/audio_windows'
+# midi_win_out_path = '../data/midi_windows'
 
 
 for filename in sorted(os.listdir(directory_path)):

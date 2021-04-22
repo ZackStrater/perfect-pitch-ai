@@ -272,49 +272,51 @@ class Song:
     def normalize_mel_spectrogram(self):
         self.mel_spectrogram = self.mel_spectrogram/np.abs(np.min(self.mel_spectrogram)) + 1
 
-    def apply_denoising_sigmoid(self, audio_array, alpha=0.8, beta=-5):
-        # db scale goes from ~-40 to 0, with 0 being the loudest
-        # alpha affects the sloped of the sigmoid curve, beta centers it around a certain db value
-        # alpha = 0.8, beta = -5 works well for denoising
+    def apply_denoising_sigmoid(self, alpha=8, beta=4):
+        # gets rid of noise and intensifies existing signals
+        # alpha determines the 'slope' of the sigmoid curve (higher alpha = steeper)
+        # beta moves sigmoid left to right
+        # alpha = 8, beta = 4 is well calibrated for a normalized mel spectrum (values ranging from 0 to 1)
+        # values < 0.5 are reduced, values > 0.5 are amplified
+        # more accurate: 1.02/(1 + np.exp(-8*x-4)) - 0.0183
         def db_sigmoid(x):
-            return 1/(1 + np.exp(alpha*(-x-beta)))
+            return 1/(1 + np.exp(-alpha*x+beta))
         vectorized_db_sigmoid = np.vectorize(db_sigmoid)
-        pass
-        # TODO fix this
+        self.mel_spectrogram = vectorized_db_sigmoid(self.mel_spectrogram)
 
     '''META FUNCTIONS'''
-    def split_audio_and_midi_into_equal_partitions(self, time_interval):
-        # split audio and downsampled  midi arrays into chunks based of length time_interval (in seconds)
-        self.spectrogram_array_splits = self.split_into_intervals(self.db_spectrogram, time_interval, self.sample_rate)
-        self.midi_note_array_splits = self.split_into_intervals(self.midi_note_array, time_interval, self.sample_rate)
-        assert len(self.spectrogram_array_splits) == len(self.midi_note_array_splits)
-
-    def save_splits(self, midi_directory_path, audio_directory_path, filename=''):
-        for i, (midi, audio) in enumerate(zip(self.midi_note_array_splits, self.spectrogram_array_splits)):
-            with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
-                np.save(f, midi)
-            with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
-                np.save(f, audio)
-
-    def format_split_save_synced_midi_audio_files(self, midi_directory_path, audio_directory_path, filename='', time_interval=8, spectrogram_freq_ceiling=825,
-                                                  apply_sus=True, remove_high_frequencies=True, remove_velocity=True, convert_midi_to_pianoroll=True,
-                                                  downsample=True, apply_denoising=False, alpha=0.8, beta=-5):
-        if apply_sus:
-            self.populate_midi_note_array()
-        else:
-            self.populate_midi_note_array(apply_sus=False)
-        if remove_high_frequencies:
-            self.remove_high_frequencies_from_spectrogram(frequency_ceiling=spectrogram_freq_ceiling)
-        if remove_velocity:
-            self.remove_velocities_from_midi_note_array()
-        if convert_midi_to_pianoroll:
-            self.convert_midi_array_to_pianoroll()
-        if apply_denoising:
-            self.apply_denoising_sigmoid(alpha, beta)
-        if downsample:
-            self.downsample_midi_note_array()
-        self.split_audio_and_midi_into_equal_partitions(time_interval)
-        self.save_splits(midi_directory_path, audio_directory_path, filename=filename)
+    # def split_audio_and_midi_into_equal_partitions(self, time_interval):
+    #     # split audio and downsampled  midi arrays into chunks based of length time_interval (in seconds)
+    #     self.spectrogram_array_splits = self.split_into_intervals(self.db_spectrogram, time_interval, self.sample_rate)
+    #     self.midi_note_array_splits = self.split_into_intervals(self.midi_note_array, time_interval, self.sample_rate)
+    #     assert len(self.spectrogram_array_splits) == len(self.midi_note_array_splits)
+    #
+    # def save_splits(self, midi_directory_path, audio_directory_path, filename=''):
+    #     for i, (midi, audio) in enumerate(zip(self.midi_note_array_splits, self.spectrogram_array_splits)):
+    #         with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
+    #             np.save(f, midi)
+    #         with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
+    #             np.save(f, audio)
+    #
+    # def format_split_save_synced_midi_audio_files(self, midi_directory_path, audio_directory_path, filename='', time_interval=8, spectrogram_freq_ceiling=825,
+    #                                               apply_sus=True, remove_high_frequencies=True, remove_velocity=True, convert_midi_to_pianoroll=True,
+    #                                               downsample=True, apply_denoising=False, alpha=8, beta=4):
+    #     if apply_sus:
+    #         self.populate_midi_note_array()
+    #     else:
+    #         self.populate_midi_note_array(apply_sus=False)
+    #     if remove_high_frequencies:
+    #         self.remove_high_frequencies_from_spectrogram(frequency_ceiling=spectrogram_freq_ceiling)
+    #     if remove_velocity:
+    #         self.remove_velocities_from_midi_note_array()
+    #     if convert_midi_to_pianoroll:
+    #         self.convert_midi_array_to_pianoroll()
+    #     if apply_denoising:
+    #         self.apply_denoising_sigmoid(alpha, beta)
+    #     if downsample:
+    #         self.downsample_midi_note_array()
+    #     self.split_audio_and_midi_into_equal_partitions(time_interval)
+    #     self.save_splits(midi_directory_path, audio_directory_path, filename=filename)
 
 
     '''MEL SPECTROGRAM FORMATTING AND PROCESSING'''
@@ -336,9 +338,8 @@ class Song:
             warnings.warn('WARNING: Unsupported filetype')
         if save_midi_windows:
             for i, (midi, audio, midi_win) in enumerate(zip(self.midi_slices, self.mel_windows, self.midi_windows)):
-                with open(f'{midi_directory_path}/{filename}_midi_{i}.{file_format}', 'wb') as f:
-                    im = Image.fromarray((midi*255).astype(np.uint8))
-                    im.save(f)
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:  # TODO can just save this as numpy array
+                    np.save(f, midi)
 
                 with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
                     im = Image.fromarray((audio*255).astype(np.uint8))
@@ -351,9 +352,8 @@ class Song:
 
         else:
             for i, (midi, audio) in enumerate(zip(self.midi_slices, self.mel_windows)):
-                with open(f'{midi_directory_path}/{filename}_midi_{i}.{file_format}', 'wb') as f:
-                    im = Image.fromarray((midi*255).astype(np.uint8))
-                    im.save(f)
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:  # TODO can just save this as numpy array
+                    np.save(f, midi)
                 with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
                     im = Image.fromarray((audio*255).astype(np.uint8))
                     im.save(f)
@@ -384,7 +384,7 @@ class Song:
     def process_audio_midi_save_slices(self,
                                        midi_directory_path, audio_directory_path, # path info
                                        n_mels, stepsize, left_buffer, right_buffer, # audio info
-                                       normalize_mel_spectrogram=True, apply_denoising=False, alpha=0.8, beta=-5,
+                                       normalize_mel_spectrogram=True, apply_denoising=False, alpha=8, beta=4,
                                        apply_sus=True, remove_velocity=True, # midi info
                                        convert_midi_to_pianoroll=True, downsample = True,
                                        filename='', file_format='png', save=True, save_midi_windows=False, midi_window_directory_path=''):
@@ -405,7 +405,9 @@ class Song:
         if normalize_mel_spectrogram:
             self.normalize_mel_spectrogram()
         if apply_denoising:
+            print(self.mel_spectrogram)
             self.apply_denoising_sigmoid(alpha, beta)
+            print(self.mel_spectrogram)
         self.mel_windows, self.midi_slices, self.midi_windows = self.get_audio_windows_and_midi_slices(self.mel_spectrogram, self.midi_note_array, stepsize, left_buffer, right_buffer)
         if save_midi_windows and save:
             self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,
@@ -415,27 +417,4 @@ class Song:
             self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,
                                                 file_format=file_format)
 
-if __name__ == '__main__':
 
-    new_song = Song('../data/test_midi_csv.midi', '../data/test_aduio.wav')
-
-    midi_filepath = '/home/zackstrater/Desktop/test_midi_audio_files/midi_files'
-    audio_filepath = '/home/zackstrater/Desktop/test_midi_audio_files/audio_files'
-    new_song.format_split_save_synced_midi_audio_files(midi_filepath, audio_filepath, filename='testing')
-
-    import os
-    # midi_path = '/home/zackstrater/Desktop/test_midi_audio_files/midi_files'
-    # for filename in sorted(os.listdir(midi_path)):
-    #     print(filename)
-    #     array = np.load(os.path.join(midi_path, filename))
-    #     print(array)
-    #     print(array.shape)
-    #     new_song.compare_arrays(array, array)
-
-    audio_path = '/home/zackstrater/Desktop/test_midi_audio_files/audio_files'
-    for filename in sorted(os.listdir(audio_path)):
-        print(filename)
-        array = np.load(os.path.join(audio_path, filename))
-        print(array)
-        print(array.shape)
-        new_song.compare_arrays(array, array)
