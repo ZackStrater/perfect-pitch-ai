@@ -28,6 +28,7 @@ for filename in os.listdir('/media/zackstrater/New Volume/maestro-v3.0.0/2018'):
             mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=128)
             log_mel_sprectrogram = librosa.power_to_db(mel_spectrogram)
             print(np.min(log_mel_sprectrogram))
+            print(np.max(log_mel_sprectrogram))
 
 # import numpy as np
 # np. set_printoptions(threshold=np. inf)

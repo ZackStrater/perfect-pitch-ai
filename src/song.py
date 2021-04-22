@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy.ndimage import zoom
 import matplotlib.pyplot as plt
+from PIL import Image
+import warnings
 
 class Song:
     def __init__(self, midi_filepath, audio_filepath):
@@ -57,6 +59,7 @@ class Song:
         first_sample = left_buffer
         last_sample = array_len - right_buffer
         center_indices = np.arange(first_sample, last_sample, stepsize)
+
         def left_right_indices(center, left, right):
             return center - left, center + right + 1
         vec_left_right_indices = np.vectorize(left_right_indices)
@@ -317,7 +320,7 @@ class Song:
     '''MEL SPECTROGRAM FORMATTING AND PROCESSING'''
     def process_mel_spectrogram(self, n_mels):
         mel_spectrogram = np.flipud(librosa.feature.melspectrogram(self.audio_waveform, sr=self.sample_rate, n_mels=n_mels))
-        log_mel_spectrogram = librosa.power_to_db(mel_spectrogram)
+        log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=np.max)
         self.mel_spectrogram = log_mel_spectrogram
 
     def get_audio_windows_and_midi_slices(self, audio_array, midi_array, stepsize, left_buffer, right_buffer):
@@ -328,21 +331,54 @@ class Song:
         midi_slices = self.get_midi_slices(midi_array, center_indices)
         return audio_windows, midi_slices, midi_windows
 
-    def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename='', save_midi_windows=False, midi_window_directory_path=''):
+    def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename='', file_format='png', save_midi_windows=False, midi_window_directory_path=''):
+        if file_format not in ['npy', 'png', 'bmp', 'jpeg']:
+            warnings.warn('WARNING: Unsupported filetype')
         if save_midi_windows:
-            for i, (midi_win, midi_slice, audio) in enumerate(zip(self.midi_windows, self.midi_slices, self.mel_windows)):
-                with open(f'{midi_directory_path}/{filename}_{i}_midi.npy', 'wb') as f:
-                    np.save(f, midi_slice)
-                with open(f'{audio_directory_path}/{filename}_{i}_audio.npy', 'wb') as f:
-                    np.save(f, audio)
-                with open(f'{midi_window_directory_path}/{filename}_{i}_mwin.npy', 'wb') as f:
-                    np.save(f, midi_win)
+            for i, (midi, audio, midi_win) in enumerate(zip(self.midi_slices, self.mel_windows, self.midi_windows)):
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.{file_format}', 'wb') as f:
+                    im = Image.fromarray((midi*255).astype(np.uint8))
+                    im.save(f)
+
+                with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
+                    im = Image.fromarray((audio*255).astype(np.uint8))
+                    im.save(f)
+
+                with open(f'{midi_window_directory_path}/{filename}_mwin_{i}.{file_format}', 'wb') as f:
+                    im = Image.fromarray((midi_win*255).astype(np.uint8))
+                    im.save(f)
+
+
         else:
             for i, (midi, audio) in enumerate(zip(self.midi_slices, self.mel_windows)):
-                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
-                    np.save(f, midi)
-                with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
-                    np.save(f, audio)
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.{file_format}', 'wb') as f:
+                    im = Image.fromarray((midi*255).astype(np.uint8))
+                    im.save(f)
+                with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
+                    im = Image.fromarray((audio*255).astype(np.uint8))
+                    im.save(f)
+
+    # def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename='', save_midi_windows=False, midi_window_directory_path=''):
+    #     if save_midi_windows:
+    #         with open(f'{midi_directory_path}/{filename}_midi.npy', 'wb') as f:
+    #             print(np.array(self.midi_slices).shape)
+    #             np.save(f, np.array(self.midi_slices))
+    #             print('saved midi slice')
+    #         with open(f'{audio_directory_path}/{filename}_audio.npy', 'wb') as f:
+    #             print(np.array(self.mel_windows).shape)
+    #             np.save(f, np.array(self.mel_windows))
+    #             print('saved audio window')
+    #
+    #         with open(f'{midi_window_directory_path}/{filename}_mwin.npy', 'wb') as f:
+    #             print(np.array(self.midi_windows).shape)
+    #             np.save(f, np.array(self.midi_windows))
+    #             print('saved midi_windows')
+    #
+    #     else:
+    #         with open(f'{midi_directory_path}/{filename}_midi.npy', 'wb') as f:
+    #             np.save(f, np.array(self.midi_slices))
+    #         with open(f'{audio_directory_path}/{filename}_audio.npy', 'wb') as f:
+    #             np.save(f, np.array(self.mel_windows))
 
 
     def process_audio_midi_save_slices(self,
@@ -351,7 +387,7 @@ class Song:
                                        normalize_mel_spectrogram=True, apply_denoising=False, alpha=0.8, beta=-5,
                                        apply_sus=True, remove_velocity=True, # midi info
                                        convert_midi_to_pianoroll=True, downsample = True,
-                                       filename='', save=True, save_midi_windows=False, midi_window_directory_path=''):
+                                       filename='', file_format='png', save=True, save_midi_windows=False, midi_window_directory_path=''):
         # MIDI FUNCS
         if apply_sus:
             self.populate_midi_note_array()
@@ -372,9 +408,12 @@ class Song:
             self.apply_denoising_sigmoid(alpha, beta)
         self.mel_windows, self.midi_slices, self.midi_windows = self.get_audio_windows_and_midi_slices(self.mel_spectrogram, self.midi_note_array, stepsize, left_buffer, right_buffer)
         if save_midi_windows and save:
-            self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename, save_midi_windows=True, midi_window_directory_path=midi_window_directory_path)
+            self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,
+                                                file_format=file_format, save_midi_windows=True,
+                                                midi_window_directory_path=midi_window_directory_path)
         elif save:
-            self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename)
+            self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,
+                                                file_format=file_format)
 
 if __name__ == '__main__':
 

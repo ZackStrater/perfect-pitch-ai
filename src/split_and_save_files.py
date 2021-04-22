@@ -10,9 +10,15 @@ from termcolor import cprint
 midi_bin = []
 audio_bin = []
 directory_path = '/media/zackstrater/New Volume/maestro-v3.0.0/2018'
-midi_out_path = '/media/zackstrater/New Volume/audio_windows_midi_slices/midi_slices'
-audio_out_path = '/media/zackstrater/New Volume/audio_windows_midi_slices/audio_windows'
-midi_win_out_path = '/media/zackstrater/New Volume/audio_windows_midi_slices/midi_windows'
+# midi_out_path = '/media/zackstrater/New Volume/testing_png/midi_slices'
+# audio_out_path = '/media/zackstrater/New Volume/testing_png/audio_windows'
+# midi_win_out_path = '/media/zackstrater/New Volume/testing_png/midi_windows'
+
+
+midi_out_path = '../data/midi_slices'
+audio_out_path = '../data/audio_windows'
+midi_win_out_path = '../data/midi_windows'
+
 
 for filename in sorted(os.listdir(directory_path)):
     if filename.endswith(".midi"):
@@ -28,7 +34,8 @@ for midi_file, audio_file in zip(midi_bin, audio_bin):
     song = Song(os.path.join(directory_path, midi_file), os.path.join(directory_path, audio_file))
     try:
         song.process_audio_midi_save_slices(midi_out_path, audio_out_path, normalize_mel_spectrogram=True, n_mels=128,
-                                            stepsize=10, left_buffer=100, right_buffer=27, filename=midi_filename, save_midi_windows=True, midi_window_directory_path=midi_win_out_path)
+                                            stepsize=20, left_buffer=100, right_buffer=27, filename=midi_filename, file_format='png',
+                                            save_midi_windows=True, midi_window_directory_path=midi_win_out_path)
         print('song split and saved')
     except AssertionError:
         _, _, tb = sys.exc_info()
@@ -36,4 +43,5 @@ for midi_file, audio_file in zip(midi_bin, audio_bin):
         filename, line, func, text = tb_info[-1]
 
         cprint('An error occurred on line {} in statement {}'.format(line, text), 'red')
+
 
