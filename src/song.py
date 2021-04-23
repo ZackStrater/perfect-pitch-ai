@@ -338,7 +338,7 @@ class Song:
             warnings.warn('WARNING: Unsupported filetype')
         if save_midi_windows:
             for i, (midi, audio, midi_win) in enumerate(zip(self.midi_slices, self.mel_windows, self.midi_windows)):
-                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:  # TODO can just save this as numpy array
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
                     np.save(f, midi)
 
                 with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
@@ -352,7 +352,7 @@ class Song:
 
         else:
             for i, (midi, audio) in enumerate(zip(self.midi_slices, self.mel_windows)):
-                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:  # TODO can just save this as numpy array
+                with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
                     np.save(f, midi)
                 with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
                     im = Image.fromarray((audio*255).astype(np.uint8))
