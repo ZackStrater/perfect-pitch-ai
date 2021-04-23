@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/load_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/load_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/song.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/song.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/split_and_save_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/split_and_save_files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/test3.py" afterDir="false" />
     </list>
@@ -40,7 +39,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../assignments/convolutional-neural-nets" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
