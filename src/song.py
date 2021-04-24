@@ -414,6 +414,10 @@ class Song:
             self.normalize_mel_spectrogram()
         if apply_denoising:
             self.apply_denoising_sigmoid(alpha, beta)
+
+        # DOWNSAMPLING MIDI AND AUDIO
+        if downsample_time_dimension:
+            self.downsample_time_dimension(time_dimension_factor)
         self.mel_windows, self.midi_slices, self.midi_windows = self.get_audio_windows_and_midi_slices(self.mel_spectrogram, self.midi_note_array, stepsize, left_buffer, right_buffer)
         if save_midi_windows and save:
             self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,

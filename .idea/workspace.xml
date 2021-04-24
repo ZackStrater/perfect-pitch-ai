@@ -2,18 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1d76b72-71e8-411f-8802-e78330e088ef" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/ableton_song.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ableton_split_and_save_files.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/transfer learning.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/saved_model.pb" beforeDir="false" afterPath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/saved_model.pb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/variables/variables.data-00000-of-00002" beforeDir="false" afterPath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/variables/variables.data-00000-of-00002" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/variables/variables.data-00001-of-00002" beforeDir="false" afterPath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/variables/variables.data-00001-of-00002" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/variables/variables.index" beforeDir="false" afterPath="$PROJECT_DIR$/models/sus_128mels_50l_19r__model/variables/variables.index" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/load_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/load_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/song.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/song.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/split_and_save_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/split_and_save_files.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
