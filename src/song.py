@@ -284,6 +284,13 @@ class Song:
         vectorized_db_sigmoid = np.vectorize(db_sigmoid)
         self.mel_spectrogram = vectorized_db_sigmoid(self.mel_spectrogram)
 
+    def downsample_time_dimension(self, factor=0.1):
+        # zoom with order=0 uses nearest neighbor approach
+        resized_midi_array = zoom(self.midi_note_array, (1, factor), order=0)
+        self.midi_note_array = resized_midi_array
+        resized_audio_array = zoom(self.mel_spectrogram, (1, factor), order=1)
+        self.mel_spectrogram = resized_audio_array
+
     '''META FUNCTIONS'''
     # def split_audio_and_midi_into_equal_partitions(self, time_interval):
     #     # split audio and downsampled  midi arrays into chunks based of length time_interval (in seconds)
@@ -387,6 +394,7 @@ class Song:
                                        normalize_mel_spectrogram=True, apply_denoising=False, alpha=8, beta=4,
                                        apply_sus=True, remove_velocity=True, # midi info
                                        convert_midi_to_pianoroll=True, downsample = True,
+                                       downsample_time_dimension=False, time_dimension_factor=0.1,
                                        filename='', file_format='png', save=True, save_midi_windows=False, midi_window_directory_path=''):
         # MIDI FUNCS
         if apply_sus:
@@ -405,9 +413,7 @@ class Song:
         if normalize_mel_spectrogram:
             self.normalize_mel_spectrogram()
         if apply_denoising:
-            print(self.mel_spectrogram)
             self.apply_denoising_sigmoid(alpha, beta)
-            print(self.mel_spectrogram)
         self.mel_windows, self.midi_slices, self.midi_windows = self.get_audio_windows_and_midi_slices(self.mel_spectrogram, self.midi_note_array, stepsize, left_buffer, right_buffer)
         if save_midi_windows and save:
             self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,
