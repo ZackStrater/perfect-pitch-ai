@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import librosa.display
 import numpy as np
 
-y, sr = librosa.load('/media/zackstrater/New Volume/maestro-v3.0.0/2015/MIDI-Unprocessed_R1_D1-1-8_mid--AUDIO-from_mp3_01_R1_2015_wav--1.wav', sr=None)
+y, sr = librosa.load('/home/zackstrater/audio_midi_repository/testing/test3.wav', sr=None)
 print(sr)
 # x is series with amplitude at each sample
 # sr is number of samples
 
 
-mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=128)
+mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=300)
 print(mel_spectrogram)
 log_mel_sprectrogram = librosa.power_to_db(mel_spectrogram)
 norm_mel = log_mel_sprectrogram/80 + 1
@@ -20,19 +20,25 @@ print(norm_mel)
 
 X = librosa.stft(y)
 Xdb = librosa.amplitude_to_db(abs(X))
-
-plt.grid(b=None)
-plt.imshow(np.flipud(Xdb), aspect='auto', interpolation='nearest')
+fig, axs = plt.subplots(1, 3, figsize=(15, 20))
+axs[0].imshow(np.flipud(Xdb), aspect='auto', interpolation='nearest')
+axs[1].imshow(np.flipud(log_mel_sprectrogram), aspect='auto', interpolation='nearest')
+axs[2].imshow(np.flipud(norm_mel), aspect='auto', interpolation='nearest')
 plt.show()
 
-
-plt.grid(b=None)
-plt.imshow(np.flipud(log_mel_sprectrogram), aspect='auto', interpolation='nearest')
-plt.show()
-
-plt.grid(b=None)
-plt.imshow(np.flipud(norm_mel), aspect='auto', interpolation='nearest')
-plt.show()
+# fig, axs = plt.subplots()
+# plt.grid(b=None)
+# plt.imshow(np.flipud(Xdb), aspect='auto', interpolation='nearest')
+# plt.show()
+#
+#
+# plt.grid(b=None)
+# plt.imshow(np.flipud(log_mel_sprectrogram), aspect='auto', interpolation='nearest')
+# plt.show()
+#
+# plt.grid(b=None)
+# plt.imshow(np.flipud(norm_mel), aspect='auto', interpolation='nearest')
+# plt.show()
 
 #
 # # index is sample number, convert to time in seconds by taking inverse

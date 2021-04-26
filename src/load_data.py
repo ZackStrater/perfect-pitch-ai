@@ -13,8 +13,8 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/sus_128mels_9l_90r_step30/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/sus_128mels_9l_90r_step30/audio_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_100l_5r_step_3_zoom1/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_100l_5r_step_3_zoom1/audio_windows'
 midi_files_bin = []
 audio_files_bin = []
 for filename in sorted(os.listdir(midi_path)):
@@ -41,8 +41,15 @@ df = pd.DataFrame()
 df['filenames'] = audio_files_bin
 note_labels = np.arange(21, 109)
 df[note_labels] = y_train
-# midi_img = Image.open(f'{midi_win_path}/{row.iloc[1]}')
-#     # midi_arr = asarray(midi_img)/255
+
+
+
+img = Image.open(f'{audio_path}/{df.iloc[0, 0]}')
+img_arr = np.asarray(img)
+input_rows = img_arr.shape[0]
+input_columns = img_arr.shape[1]
+print(input_rows, input_columns)
+
 
 df_train, df_test = train_test_split(df, test_size=0.25)
 
@@ -52,13 +59,13 @@ gpus = tensorflow.config.experimental.list_physical_devices('GPU')
 tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 train_datagen = ImageDataGenerator(rescale=1./255)
 train_gen = train_datagen.flow_from_dataframe(df_train, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
-                                              seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(128,100))
+                                              seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(input_rows,input_columns))
 valid_datagen = ImageDataGenerator(rescale=1./255)
 valid_gen = valid_datagen.flow_from_dataframe(df_test, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
-                                            seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(128,100))
+                                            seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(input_rows,input_columns))
 test_datagen = ImageDataGenerator(rescale=1./255)
 test_gen = test_datagen.flow_from_dataframe(df_test, audio_path, x_col='filenames', batch_size=1,
-                                            seed=42, shuffle=True, class_mode=None, color_mode='grayscale', target_size=(128,100))
+                                            seed=42, shuffle=True, class_mode=None, color_mode='grayscale', target_size=(input_rows,input_columns))
 
 
 import keras.backend as K
@@ -85,12 +92,12 @@ def create_weighted_binary_crossentropy(zero_weight, one_weight):
 weighted_binary_crossentropy = create_weighted_binary_crossentropy(0.08, 0.92)
 
 model = Sequential()
-model.add(Conv2D(filters=50, kernel_size=(3, 3), padding='same', input_shape=(128, 100, 1)))
+model.add(Conv2D(filters=50, kernel_size=(3, 3), padding='same', input_shape=(input_rows, input_columns, 1)))
 model.add(Activation('relu'))
 model.add(Conv2D(filters=50, kernel_size=(3, 3), padding='same'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(filters=25, kernel_size=(3, 3), padding='valid'))
+model.add(Conv2D(filters=25, kernel_size=(3, 3), padding='same'))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
@@ -103,7 +110,7 @@ model.compile(loss='binary_crossentropy', optimizer='Adam',
                        tensorflow.keras.metrics.Recall(),
                        ])
 
-model.fit(train_gen, steps_per_epoch=df_train.shape[0]/32, epochs=10, validation_data=valid_gen,
+model.fit(train_gen, steps_per_epoch=df_train.shape[0]/32, epochs=20, validation_data=valid_gen,
         validation_steps=df_test.shape[0]/32, verbose=1)
 
 

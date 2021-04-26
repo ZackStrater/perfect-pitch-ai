@@ -56,10 +56,10 @@ gpus = tensorflow.config.experimental.list_physical_devices('GPU')
 tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input, rescale=1./255)
 train_gen = train_datagen.flow_from_dataframe(df_train, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
-                                              seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(128,70))
+                                              seed=42, shuffle=True, class_mode='raw', color_mode='rbg', target_size=(128,70))
 valid_datagen = ImageDataGenerator(preprocessing_function=preprocess_input, rescale=1./255)
 valid_gen = valid_datagen.flow_from_dataframe(df_test, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
-                                            seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(128,70))
+                                            seed=42, shuffle=True, class_mode='raw', color_mode='rbg', target_size=(128,70))
 
 
 

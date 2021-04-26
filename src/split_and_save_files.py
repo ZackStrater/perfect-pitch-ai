@@ -8,7 +8,8 @@ import sys
 from termcolor import cprint
 
 def save_and_split(path_in, midi_out, audio_out, midi_win_out='', save_midi_windows=False, n_mels=128, stepsize=30,
-                   left_buffer=50, right_buffer=19, apply_sus=True, apply_denoising=False):
+                   left_buffer=50, right_buffer=19, apply_sus=True, apply_denoising=False,
+                   downsample_time_dimension=False, time_dimension_factor=0.1):
 
     midi_bin = []
     audio_bin = []
@@ -29,6 +30,8 @@ def save_and_split(path_in, midi_out, audio_out, midi_win_out='', save_midi_wind
             song.process_audio_midi_save_slices(midi_out, audio_out, normalize_mel_spectrogram=True, n_mels=n_mels, apply_sus=apply_sus,
                                                 stepsize=stepsize, left_buffer=left_buffer, right_buffer=right_buffer, apply_denoising=apply_denoising,
                                                 filename=midi_filename, file_format='png',
+                                                downsample_time_dimension=downsample_time_dimension,
+                                                time_dimension_factor=time_dimension_factor,
                                                 save_midi_windows=save_midi_windows, midi_window_directory_path=midi_win_out)
             print('song split and saved')
         except AssertionError:
@@ -79,39 +82,60 @@ directory_path = '/home/zackstrater/audio_midi_repository/2018'
 # save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=19, apply_sus=False, apply_denoising=True)
 
 
-midi_out = '/home/zackstrater/audio_midi_repository/sus_128mels_9l_90r_step30/midi_slices'
-audio_out = '/home/zackstrater/audio_midi_repository/sus_128mels_9l_90r_step30/audio_windows'
-
-save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=90, right_buffer=9, apply_sus=True)
-
-
-
-
-
-
-
-
-
-# for filename in sorted(os.listdir(directory_path)):
-#     if filename.endswith(".midi"):
-#         midi_bin.append(filename)
-#     elif filename.endswith(".wav"):
-#         audio_bin.append(filename)
+# midi_out = '/home/zackstrater/audio_midi_repository/sus_128mels_9l_90r_step30/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/sus_128mels_9l_90r_step30/audio_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=9, right_buffer=90, apply_sus=True)
 #
 #
-# for midi_file, audio_file in zip(midi_bin, audio_bin):
-#     midi_filename = midi_file[0:-5]
-#     audio_filename = audio_file[0:-4]
-#     assert midi_filename == audio_filename
-#     song = Song(os.path.join(directory_path, midi_file), os.path.join(directory_path, audio_file))
-#     try:
-#         song.process_audio_midi_save_slices(midi_out_path, audio_out_path, normalize_mel_spectrogram=True, n_mels=128,
-#                                             stepsize=30, left_buffer=50, right_buffer=19, filename=midi_filename, file_format='png',
-#                                             save_midi_windows=True, midi_window_directory_path=midi_win_out_path)
-#         print('song split and saved')
-#     except AssertionError:
-#         _, _, tb = sys.exc_info()
-#         tb_info = traceback.extract_tb(tb)
-#         filename, line, func, text = tb_info[-1]
+# midi_out = '/home/zackstrater/audio_midi_repository/sus_128mels_90l_9r_step30/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/sus_128mels_90l_9r_step30/audio_windows'
+# midi_win_out = '/home/zackstrater/audio_midi_repository/sus_128mels_90l_9r_step30/midi_windows'
 #
-#         cprint('An error occurred on line {} in statement {}'.format(line, text), 'red')
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=90, right_buffer=9, apply_sus=True, save_midi_windows=True, midi_win_out=midi_win_out)
+
+
+# midi_out = '/home/zackstrater/audio_midi_repository/downsample0,05_sus_128mels_3l_1r_step_2_zoom1/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/downsample0,05_sus_128mels_3l_1r_step_2_zoom1/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=3, right_buffer=1, apply_sus=True, stepsize=2,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.05)
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_100l_5r_step_3_zoom1/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_100l_5r_step_3_zoom1/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=100, right_buffer=5, apply_sus=True, stepsize=3,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.1)
+#
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_50l_20r_step_3_zoom1/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_50l_20r_step_3_zoom1/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=20, apply_sus=True, stepsize=3,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.1)
+
+midi_out = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_50l_40r_step_3_zoom1/midi_slices'
+audio_out = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_50l_40r_step_3_zoom1/audio_windows'
+# midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+
+save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=40, apply_sus=True, stepsize=3,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.1)
+
+midi_out = '/home/zackstrater/audio_midi_repository/downsample0,05_sus_128mels_50l_20r_step_3_zoom1/midi_slices'
+audio_out = '/home/zackstrater/audio_midi_repository/downsample0,05_sus_128mels_50l_20r_step_3_zoom1/audio_windows'
+# midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+
+save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=20, apply_sus=True, stepsize=2,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.05)
+
+midi_out = '/home/zackstrater/audio_midi_repository/downsample0,025_sus_128mels_50l_20r_step_3_zoom1/midi_slices'
+audio_out = '/home/zackstrater/audio_midi_repository/downsample0,025_sus_128mels_50l_20r_step_3_zoom1/audio_windows'
+# midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+
+save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=20, apply_sus=True, stepsize=1,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.025)
+
+
