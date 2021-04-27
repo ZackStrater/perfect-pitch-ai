@@ -13,17 +13,22 @@ print(sr)
 mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=300)
 print(mel_spectrogram)
 log_mel_sprectrogram = librosa.power_to_db(mel_spectrogram)
-norm_mel = log_mel_sprectrogram/80 + 1
 
-print(log_mel_sprectrogram)
-print(norm_mel)
+C = np.abs(librosa.cqt(y, sr=sr, n_bins=112))
+CQT = librosa.amplitude_to_db(C, ref=np.max)
+print(CQT)
+
+
+V = np.abs(librosa.vqt(y, sr=sr, n_bins=112))
+VQT = librosa.amplitude_to_db(V, ref=np.max)
+print(CQT)
 
 X = librosa.stft(y)
 Xdb = librosa.amplitude_to_db(abs(X))
 fig, axs = plt.subplots(1, 3, figsize=(15, 20))
-axs[0].imshow(np.flipud(Xdb), aspect='auto', interpolation='nearest')
+axs[0].imshow(np.flipud(VQT), aspect='auto', interpolation='nearest')
 axs[1].imshow(np.flipud(log_mel_sprectrogram), aspect='auto', interpolation='nearest')
-axs[2].imshow(np.flipud(norm_mel), aspect='auto', interpolation='nearest')
+axs[2].imshow(np.flipud(CQT), aspect='auto', interpolation='nearest')
 plt.show()
 
 # fig, axs = plt.subplots()

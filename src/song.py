@@ -24,9 +24,9 @@ class Song:
         self.tempo = microsec_per_quarter
         self.PPQ = ticks_per_quarter
         self.song_total_midi_ticks = int(self.track_end[0].split(', ')[1])
-        self.midi_note_array = np.zeros((127, self.song_total_midi_ticks))
+        self.midi_note_array = np.zeros((128, self.song_total_midi_ticks))
         self.midi_sus_array = np.zeros((1, self.song_total_midi_ticks))
-        self.downsampled_tempo =None
+        self.downsampled_midi_ratio = 1
         self.midi_array_splits = None
 
         self.audio_waveform, self.sample_rate = librosa.load(audio_filepath, sr=None)
@@ -40,16 +40,23 @@ class Song:
         self.midi_windows = None
         self.midi_slices = None
 
+        self.prediction_audio_array = None
+        self.prediction_audio_windows = None
+        self.prediction_midi_slices = None
+        self.prediction_midi_array = None
+
+        self.export_midi_array = None
+
     '''HELPER FUNCTIONS'''
     def map_note(self, array, note_value, note_start, note_end, velocity, inverse=True):
         # maps midi notes onto the midi array
         # numpy slice isn't inclusive of note_end, as mentioned above
-        # have to take abs of (127 - note_value) to make lower notes go to bottom, higher notes to top
-        # note value 0 is the lowest note, needs to go to last row (127)
-        # note value 127 is highest note, needs to go to first row (0)
+        # have to take abs of (128 - note_value) to make lower notes go to bottom, higher notes to top
+        # note value 0 is the lowest note, needs to go to last row (128)
+        # note value 128 is highest note, needs to go to first row (0)
         if inverse:
             # for midi note array
-            array[np.abs(127 - note_value), note_start:note_end] = velocity
+            array[np.abs(128 - note_value), note_start:note_end] = velocity
         else:
             # for sustain pedal array
             array[note_value, note_start:note_end] = velocity
@@ -210,6 +217,9 @@ class Song:
             df_sus_presses = df_sus[sus_press_indexes]
 
             if df_sus_presses.shape[0] != df_sus_releases.shape[0]:
+                df_sus_releases = df_sus_releases.append({'track': 2, 'tick': self.song_total_midi_ticks, 'control': 'Control_c',
+                                        'channel':0, 'control_num': 64, 'velocity': 0, 'duration': 0}, ignore_index=True)
+
                 print('sustain pedal issue')
                 print(df_sus_presses.shape[0])
                 print(df_sus_releases.shape[0])
@@ -242,7 +252,7 @@ class Song:
         # zoom with order=0 uses nearest neighbor approach
         resized_array = zoom(self.midi_note_array, (1, ratio), order=0)
         self.midi_note_array = resized_array
-        self.downsampled_tempo = self.tempo*ratio
+        self.downsampled_midi_ratio *= ratio
 
 
     def remove_velocities_from_midi_note_array(self):
@@ -284,12 +294,13 @@ class Song:
         vectorized_db_sigmoid = np.vectorize(db_sigmoid)
         self.mel_spectrogram = vectorized_db_sigmoid(self.mel_spectrogram)
 
-    def downsample_time_dimension(self, factor=0.1):
+    def downsample_time_dimension(self, factor=0.25):
         # zoom with order=0 uses nearest neighbor approach
         resized_midi_array = zoom(self.midi_note_array, (1, factor), order=0)
         self.midi_note_array = resized_midi_array
         resized_audio_array = zoom(self.mel_spectrogram, (1, factor), order=1)
         self.mel_spectrogram = resized_audio_array
+        self.downsampled_midi_ratio *= factor
 
     '''META FUNCTIONS'''
     # def split_audio_and_midi_into_equal_partitions(self, time_interval):
@@ -327,16 +338,24 @@ class Song:
 
 
     '''MEL SPECTROGRAM FORMATTING AND PROCESSING'''
-    def process_mel_spectrogram(self, n_mels):
-        mel_spectrogram = np.flipud(librosa.feature.melspectrogram(self.audio_waveform, sr=self.sample_rate, n_mels=n_mels))
-        log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=np.max)
-        self.mel_spectrogram = log_mel_spectrogram
+    def process_mel_spectrogram(self, n_mels, CQT=False, VQT=False):
+        if CQT:
+            C = np.abs(librosa.cqt(self.audio_waveform, sr=self.sample_rate, n_bins=112))
+            CQT = librosa.amplitude_to_db(C, ref=np.max)
+            self.mel_spectrogram = np.flipud(CQT)
+        elif VQT:
+            V = np.abs(librosa.vqt(self.audio_waveform, sr=self.sample_rate, n_bins=112))
+            VQT = librosa.amplitude_to_db(V, ref=np.max)
+            self.mel_spectrogram = np.flipud(VQT)
+        else:
+            mel_spectrogram = np.flipud(librosa.feature.melspectrogram(self.audio_waveform, sr=self.sample_rate, n_mels=n_mels))
+            log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=np.max)
+            self.mel_spectrogram = log_mel_spectrogram
 
     def get_audio_windows_and_midi_slices(self, audio_array, midi_array, stepsize, left_buffer, right_buffer):
-        # TODO need to make it so you can input left and right buffer as seconds and calculate based on sample rate
         left_indices, right_indices, center_indices = self.get_window_indices(audio_array, stepsize, left_buffer, right_buffer)
         audio_windows = self.get_windows(audio_array, left_indices, right_indices)
-        midi_windows = self.get_windows(midi_array, left_indices, right_indices) # TODO remove this at some point
+        midi_windows = self.get_windows(midi_array, left_indices, right_indices)
         midi_slices = self.get_midi_slices(midi_array, center_indices)
         return audio_windows, midi_slices, midi_windows
 
@@ -395,7 +414,8 @@ class Song:
                                        apply_sus=True, remove_velocity=True, # midi info
                                        convert_midi_to_pianoroll=True, downsample = True,
                                        downsample_time_dimension=False, time_dimension_factor=0.1,
-                                       filename='', file_format='png', save=True, save_midi_windows=False, midi_window_directory_path=''):
+                                       filename='', file_format='png', save=True, save_midi_windows=False, midi_window_directory_path='',
+                                       CQT=False, VQT=False):
         # MIDI FUNCS
         if apply_sus:
             self.populate_midi_note_array()
@@ -409,7 +429,7 @@ class Song:
             self.downsample_midi_note_array()
 
         # AUDIO FUNCS
-        self.process_mel_spectrogram(n_mels)
+        self.process_mel_spectrogram(n_mels, CQT=CQT, VQT=VQT)
         if normalize_mel_spectrogram:
             self.normalize_mel_spectrogram()
         if apply_denoising:
@@ -429,4 +449,105 @@ class Song:
             self.save_audio_windows_midi_splits(midi_directory_path, audio_directory_path, filename=filename,
                                                 file_format=file_format)
 
+
+    def make_predictions(self, model, left_buffer, right_buffer):
+        self.prediction_audio_array = np.pad(self.mel_spectrogram, ((0, 0), (left_buffer, right_buffer)))
+        left_indicies, right_indices, center_indices = self.get_window_indices(self.prediction_audio_array, 1, left_buffer, right_buffer)
+        self.prediction_audio_windows = np.array(self.get_windows(self.prediction_audio_array, left_indicies, right_indices))
+        imgs = self.prediction_audio_windows.shape[0]
+        rows = self.prediction_audio_windows.shape[1]
+        columns = self.prediction_audio_windows.shape[2]
+        self.prediction_audio_windows = self.prediction_audio_windows.reshape((imgs, rows, columns, 1))
+
+        self.prediction_midi_slices = model.predict(self.prediction_audio_windows)
+        self.prediction_midi_array = np.column_stack(self.prediction_midi_slices)
+        # # np.set_printoptions(threshold=np.inf)
+        # # print(self.prediction_midi_slices)
+        # np.set_printoptions(threshold=np.inf)
+        # np.set_printoptions(linewidth=200)
+        # np.set_printoptions(suppress=True)
+        # print(self.mel_spectrogram[:, 400:450])
+        # # print(self.prediction_midi_array[:, 400:450])
+
+        self.prediction_midi_array[self.prediction_midi_array < 0.5] = 0
+        self.prediction_midi_array[self.prediction_midi_array >= 0.5] = 1
+        # fig, axs = plt.subplots(1, 3)
+        # axs[0].imshow(self.midi_note_array, aspect='auto', interpolation='nearest')
+        # axs[1].imshow(self.prediction_midi_array, aspect='auto', interpolation='nearest')
+        # axs[2].imshow(self.mel_spectrogram, aspect='auto', interpolation='nearest')
+        # plt.show()
+
+    def export_midi_prediction_array(self, midi_array, path_out):
+        self.export_midi_array = np.flipud(np.pad(midi_array, ((20,20),(0,0))))
+        self.export_midi_array[self.export_midi_array > 0] = 60
+
+        def find_runs(x, row_index):
+            # finds continuous segments of note presses and returns the value, start, length, and velocity for each note
+
+            n = x.shape[0]
+            loc_run_start = np.empty(n, dtype=bool)
+            loc_run_start[0] = True
+
+            np.not_equal(x[:-1], x[1:], out=loc_run_start[1:])
+            run_starts = np.nonzero(loc_run_start)[0]
+
+            # run_velocity -> take the value of first element in the run
+            run_velocities = x[loc_run_start]
+
+            # find run lengths, unused
+            run_lengths = np.diff(np.append(run_starts, n))
+
+            # need to make a np array with note value (passed in as row_index) that is the same length as
+            # the number of notes found for that row
+            note_values = np.full(len(run_starts), row_index)
+
+            # return array where each row has [note value, start of run, velocity of note]
+            # note value is what note was played, determined by row_index passed in
+            return np.dstack((note_values, run_starts, run_velocities))[0]
+
+        # gathering note presses for each row (note) in midi array in order
+        note_presses_and_releases = np.vstack([find_runs(row, idx) for idx, row in enumerate(self.export_midi_array)])
+
+        # remove actions where the start tick and velocity are both 0
+        # these are runs of 0's found at the beginning of the track for each note
+        # if counted, it would include these as a note release for each note at the beginning of track, so they are excluded
+        mask = (note_presses_and_releases[:, 1] == 0) & (note_presses_and_releases[:, 2] == 0)
+        note_presses_and_releases = note_presses_and_releases[~mask]
+
+        # IF YOU WANT TO COMBINE SUS PEDAL AND NOTE PRESSES:
+        # sus_pedal_actions = np.vstack(find_runs(midi_sus_array[0], 128))
+        # mask = (sus_pedal_actions[:, 1] == 0) & (sus_pedal_actions[:, 2] == 0)
+        # sus_pedal_actions = sus_pedal_actions[~mask]
+        # all_midi_actions = np.vstack([note_presses_and_releases, sus_pedal_actions])
+        # sorted_all_midi_actions = all_midi_actions[all_midi_actions[:, 1].argsort()]
+
+        # JUST NOTE PRESSES AND RELEASES:
+        sorted_note_presses_and_releases = note_presses_and_releases[note_presses_and_releases[:, 1].argsort()]
+
+        def write_midi_line(track, tick, control, channel, control_num, velocity):
+            midi_string = ', '.join(
+                [str(track), str(tick), str(control), str(channel), str(control_num), str(velocity)])
+            midi_string += '\n'
+            return midi_string
+
+        # recombining midi actions with metadata and end of file strings
+        midi_out = []
+        for line in self.meta_data:
+            if 'Tempo' in line:
+                new_line = f'1, 0, Tempo, {round(self.tempo/self.downsampled_midi_ratio)}\n'
+                midi_out.append(new_line)
+            else:
+                midi_out.append(line)
+        for line in sorted_note_presses_and_releases:
+                midi_out.append(write_midi_line(2, int(line[1]), 'Note_on_c', 0, int(line[0]), int(line[2])))
+        for line in self.track_end:
+            if 'End_track' in line:
+                new_line = f'2, {round(self.song_total_midi_ticks*self.downsampled_midi_ratio)}, End_track\n'
+                midi_out.append(new_line)
+            else:
+                midi_out.append(line)
+        midi_object = pm.csv_to_midi(midi_out)
+        with open(path_out, 'wb') as output_file:
+            midi_writer = pm.FileWriter(output_file)
+            midi_writer.write(midi_object)
 

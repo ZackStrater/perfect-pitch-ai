@@ -24,7 +24,7 @@ class AbletonSong:
         self.tempo = microsec_per_quarter
         self.PPQ = ticks_per_quarter
         self.song_total_midi_ticks = int(self.track_end[0].split(', ')[1])
-        self.midi_note_array = np.zeros((127, self.song_total_midi_ticks))
+        self.midi_note_array = np.zeros((128, self.song_total_midi_ticks))
         self.midi_sus_array = np.zeros((1, self.song_total_midi_ticks))
         self.downsampled_tempo =None
         self.midi_array_splits = None
@@ -44,12 +44,12 @@ class AbletonSong:
     def map_note(self, array, note_value, note_start, note_end, velocity, inverse=True):
         # maps midi notes onto the midi array
         # numpy slice isn't inclusive of note_end, as mentioned above
-        # have to take abs of (127 - note_value) to make lower notes go to bottom, higher notes to top
-        # note value 0 is the lowest note, needs to go to last row (127)
-        # note value 127 is highest note, needs to go to first row (0)
+        # have to take abs of (128 - note_value) to make lower notes go to bottom, higher notes to top
+        # note value 0 is the lowest note, needs to go to last row (128)
+        # note value 128 is highest note, needs to go to first row (0)
         if inverse:
             # for midi note array
-            array[np.abs(127 - note_value), note_start:note_end] = velocity
+            array[np.abs(128 - note_value), note_start:note_end] = velocity
         else:
             # for sustain pedal array
             array[note_value, note_start:note_end] = velocity

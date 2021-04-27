@@ -16,8 +16,8 @@ gpus = tensorflow.config.experimental.list_physical_devices('GPU')
 tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/denoise_no_sus_128mels_50l_19r_step30/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/denoise_no_sus_128mels_50l_19r_step30/audio_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_50l_40r_step_3_zoom1/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/downsample0,1_sus_128mels_50l_40r_step_3_zoom1/audio_windows'
 midi_files_bin = []
 audio_files_bin = []
 for filename in sorted(os.listdir(midi_path)):
@@ -56,10 +56,10 @@ gpus = tensorflow.config.experimental.list_physical_devices('GPU')
 tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 train_datagen = ImageDataGenerator(preprocessing_function=preprocess_input, rescale=1./255)
 train_gen = train_datagen.flow_from_dataframe(df_train, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
-                                              seed=42, shuffle=True, class_mode='raw', color_mode='rbg', target_size=(128,70))
+                                              seed=42, shuffle=True, class_mode='raw', color_mode='rgb', target_size=(128,90))
 valid_datagen = ImageDataGenerator(preprocessing_function=preprocess_input, rescale=1./255)
 valid_gen = valid_datagen.flow_from_dataframe(df_test, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
-                                            seed=42, shuffle=True, class_mode='raw', color_mode='rbg', target_size=(128,70))
+                                            seed=42, shuffle=True, class_mode='raw', color_mode='rgb', target_size=(128,90))
 
 
 
@@ -80,7 +80,7 @@ def create_transfer_model(input_size, n_categories, weights='imagenet'):
     return model
 
 
-transfer_model = create_transfer_model(input_size=(128, 100, 3), n_categories=88)
+transfer_model = create_transfer_model(input_size=(128, 90, 3), n_categories=88)
 
 
 def change_trainable_layers(model, trainable_index):
@@ -94,12 +94,21 @@ change_trainable_layers(transfer_model, 132)
 
 
 
-transfer_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'binary_accuracy'])
+transfer_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'binary_accuracy', tensorflow.keras.metrics.Precision(), tensorflow.keras.metrics.Recall()])
 mdl_check_trans = ModelCheckpoint(filepath='../models/best_trans_model.hdf5',
                             save_best_only=True)
-transfer_model.fit_generator(generator=train_small,
-                    validation_data=val_small,
+transfer_model.fit(generator=train_gen,
+                    validation_data=valid_gen,
                     epochs=2,
-                    steps_per_epoch=steps_per_epoch,
-                    validation_steps=validation_steps,
+                    steps_per_epoch=df_train.shape[0]/32,
+                    validation_steps=df_test.shape[0]/32,
+                    callbacks=[mdl_check_trans])
+
+change_trainable_layers(transfer_model, 126)
+transfer_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', 'binary_accuracy', tensorflow.keras.metrics.Precision(), tensorflow.keras.metrics.Recall()])
+transfer_model.fit(generator=train_gen,
+                    validation_data=valid_gen,
+                    epochs=2,
+                    steps_per_epoch=df_train.shape[0]/32,
+                    validation_steps=df_test.shape[0]/32,
                     callbacks=[mdl_check_trans])

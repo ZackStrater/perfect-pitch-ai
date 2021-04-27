@@ -15,7 +15,8 @@ import matplotlib.pyplot as plt
 
 
 # import midi file, result is a list of strings that contain midi actions
-csv_string = pm.midi_to_csv('../data/test_midi_csv.midi')
+csv_string = pm.midi_to_csv('/home/zackstrater/DSIclass/capstones/audio-to-midi/data/MIDI-Unprocessed_Chamber2_MID--AUDIO_09_R3_2018_wav--1.midi')
+print(csv_string)
 
 # separate metadata and endfile data, midi_data contains all the information about note presses and releases
 meta_data = csv_string[0:7]
