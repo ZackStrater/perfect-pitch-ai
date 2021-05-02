@@ -2,18 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e1d76b72-71e8-411f-8802-e78330e088ef" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/prediction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ableton_song.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ableton_song.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ableton_split_and_save_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ableton_split_and_save_files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/audio_spectrogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/audio_spectrogram.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/load_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/load_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/midi_to_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/midi_to_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/prediction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/prediction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/song.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/song.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/split_and_save_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/split_and_save_files.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/test2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test3.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/test3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/transfer learning.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/transfer learning.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +54,7 @@
       <recent name="$PROJECT_DIR$/data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.load_data">
+  <component name="RunManager" selected="Python.split_and_save_files">
     <configuration name="Test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="audio-to-midi" />
       <option name="INTERPRETER_OPTIONS" value="" />

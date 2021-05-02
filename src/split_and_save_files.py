@@ -208,18 +208,83 @@ def save_and_split(path_in, midi_out, audio_out, midi_win_out='', save_midi_wind
 #                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.5)
 
 
+# directory_path = '/home/zackstrater/audio_midi_repository/2018'
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2018CQT/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018CQT/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=10, apply_sus=True, stepsize=61,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25, CQT=True)
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2018VQT/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018VQT/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=10, apply_sus=True, stepsize=61,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25, VQT=True)
+
+
+# directory_path = '/home/zackstrater/audio_midi_repository/2018'
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_50l_10r_step_30/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_50l_10r_step_30/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=10, apply_sus=True, stepsize=30,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+
+# directory_path = '/home/zackstrater/audio_midi_repository/2018'
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_50l_10r_step_61/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_50l_10r_step_61/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=10, apply_sus=True, stepsize=61,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+#
+# directory_path = '/home/zackstrater/audio_midi_repository/2018'
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_10l_5r_step_16/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_10l_5r_step_16/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=10, right_buffer=5, apply_sus=True, stepsize=16,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+#
+#
+# directory_path = '/home/zackstrater/audio_midi_repository/2018'
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2018NOdownsample0,25_sus_128mels_40l_20r_step_61/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018NOdownsample0,25_sus_128mels_40l_20r_step_61/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=40, right_buffer=20, apply_sus=True, stepsize=61,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=False)
+
+
+# directory_path = '/home/zackstrater/audio_midi_repository/2015'
+#
+# midi_out = '/home/zackstrater/audio_midi_repository/2015downsample0,25_sus_128mels_10l_5r_step_16/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2015downsample0,25_sus_128mels_10l_5r_step_16/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=10, right_buffer=5, apply_sus=True, stepsize=16,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+
 directory_path = '/home/zackstrater/audio_midi_repository/2018'
 
-midi_out = '/home/zackstrater/audio_midi_repository/2018CQT/midi_slices'
-audio_out = '/home/zackstrater/audio_midi_repository/2018CQT/audio_windows'
-# midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+midi_out = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/midi_slices'
+audio_out = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/audio_windows'
+midi_win_out = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/midi_windows'
 
 save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=10, apply_sus=True, stepsize=61,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25, CQT=True)
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
 
-midi_out = '/home/zackstrater/audio_midi_repository/2018VQT/midi_slices'
-audio_out = '/home/zackstrater/audio_midi_repository/2018VQT/audio_windows'
-# midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=50, right_buffer=10, apply_sus=True, stepsize=61,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25, VQT=True)
+# midi_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_10l_5r_step_16/midi_slices'
+# audio_out = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_10l_5r_step_16/audio_windows'
+# # midi_win_out = '/home/zackstrater/audio_midi_repository/downsample0,5_25l_10r_step15/midi_windows'
+#
+# save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=10, right_buffer=5, apply_sus=True, stepsize=16,
+#                save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)

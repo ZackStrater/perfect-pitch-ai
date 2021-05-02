@@ -286,11 +286,19 @@ class AbletonSong:
         self.mel_spectrogram = vectorized_db_sigmoid(self.mel_spectrogram)
 
     def downsample_time_dimension(self, factor=0.1):
+        fig, axs = plt.subplots(2, 1)
+        axs[0].imshow(self.midi_note_array[:, 500:600], aspect='auto', interpolation='nearest')
+        axs[1].imshow(self.mel_spectrogram[:, 500:600], aspect='auto', interpolation='nearest')
         # zoom with order=0 uses nearest neighbor approach
         resized_midi_array = zoom(self.midi_note_array, (1, factor), order=0)
         self.midi_note_array = resized_midi_array
-        resized_audio_array = zoom(self.mel_spectrogram, (1, factor), order=0)
+        resized_audio_array = zoom(self.mel_spectrogram, (1, factor), order=1)
         self.mel_spectrogram = resized_audio_array
+        fig, axs = plt.subplots(2, 1)
+        axs[0].imshow(self.midi_note_array[:, int(500/4):int(600/4)], aspect='auto', interpolation='nearest')
+        axs[1].imshow(self.mel_spectrogram[:, int(500/4):int(600/4)], aspect='auto', interpolation='nearest')
+        plt.show()
+        self.downsampled_midi_ratio *= factor
 
 
     '''META FUNCTIONS'''

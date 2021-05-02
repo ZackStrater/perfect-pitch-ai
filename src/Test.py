@@ -28,9 +28,9 @@ tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 # model = keras.models.load_model('/home/zackstrater/DSIclass/capstones/audio-to-midi/models/test_model')
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_50l_10r_step_61/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/2018downsample0,25_sus_128mels_50l_10r_step_61/audio_windows'
-midi_win_path = '../data/midi_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/2018_50L_25R_0,25ds_sus_step61/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/2018_50L_25R_0,25ds_sus_step61/audio_windows'
+midi_win_path = '/home/zackstrater/audio_midi_repository/2018_50L_25R_0,25ds_sus_step61/midi_windows'
 
 midi_files_bin = []
 audio_files_bin = []
@@ -53,38 +53,49 @@ for filename in sorted(os.listdir(midi_win_path)):
 #         print('no')
 
 y_images = []
-for filename in midi_files_bin[-200:]:
+for filename in midi_files_bin[::75]:
     array = np.load(os.path.join(midi_path, filename))
     y_images.append(array)
 y_train = np.array(y_images)
 
 df = pd.DataFrame()
-df['filenames'] = audio_files_bin[-200:]
-df['midi_winfiles'] = midi_win_bin[-200:]
+df['filenames'] = audio_files_bin[::75]
+df['midi_winfiles'] = midi_win_bin[::75]
 note_labels = np.arange(21, 109)
 df[note_labels] = y_train
 print(df)
 
 for index, row in df.iterrows():
     audio_img = Image.open(f'{audio_path}/{row.iloc[0]}')
+    print(row.iloc[0])
     audio_arr = asarray(audio_img)/255
-    print(audio_arr.shape)
 
     midi_img = Image.open(f'{midi_win_path}/{row.iloc[1]}')
+    print(row.iloc[1])
     midi_arr = asarray(midi_img)/255
 
     midi_slice = row.iloc[2:].values
     midi_tile = np.tile(midi_slice, (10, 1)).T.astype('float64')
-    print(midi_tile.dtype)
 
     # reshaped_audio_arr = audio_arr.reshape(1, 128, 70, 1)
     # print(reshaped_audio_arr.shape)
     # midi_pred = model.predict(reshaped_audio_arr)
     # midi_pred_tile = np.tile(midi_pred, (10, 1)).T.astype('float64')
-    fig, axs = plt.subplots(1, 4, figsize=(15, 20))
+    fig, axs = plt.subplots(1, 2, figsize=(15, 20))
     axs[0].imshow(audio_arr, aspect='auto', interpolation='nearest')
     axs[1].imshow(midi_arr, aspect='auto', interpolation='nearest')
-    axs[2].imshow(midi_tile, aspect='auto', interpolation='nearest')
+    axs[0].set_title('Audio', size=20)
+    axs[0].set_xlabel('Ticks', size=15)
+    axs[0].set_ylabel('log Hz', size=15)
+
+
+    axs[1].set_title('MIDI', size=20)
+    axs[1].set_xlabel('Ticks', size=15)
+    axs[1].set_ylabel('Note', size=15)
+
+
+
+    # axs[2].imshow(midi_tile, aspect='auto', interpolation='nearest')
     # axs[3].imshow(midi_pred_tile, aspect='auto', interpolation='nearest')
     plt.show()
 

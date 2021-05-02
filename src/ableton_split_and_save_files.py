@@ -40,10 +40,10 @@ def save_and_split(path_in, midi_out, audio_out, midi_win_out='', save_midi_wind
             cprint('An error occurred on line {} in statement {}'.format(line, text), 'red')
 
 
-directory_path = '/home/zackstrater/audio_midi_repository/testing'
+directory_path = '/home/zackstrater/audio_midi_repository/testforimages'
 midi_out = '../data/midi_slices'
 audio_out = '../data/audio_windows'
 midi_windows = '../data/midi_windows'
 
 save_and_split(directory_path, midi_out, audio_out, n_mels=128, left_buffer=25, right_buffer=10, apply_sus=False, stepsize=15,
-               save_midi_windows=True, midi_win_out=midi_windows, downsample_time_dimension=True, time_dimension_factor=0.5)
+               save_midi_windows=True, midi_win_out=midi_windows, downsample_time_dimension=True, time_dimension_factor=0.25)

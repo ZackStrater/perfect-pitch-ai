@@ -32,7 +32,7 @@ class Song:
         self.audio_waveform, self.sample_rate = librosa.load(audio_filepath, sr=None)
         self.raw_spectrogram = librosa.stft(self.audio_waveform)
         self.db_spectrogram = np.flipud(librosa.amplitude_to_db(abs(self.raw_spectrogram)))
-        self.song_total_sample_ticks = self.db_spectrogram.shape[0]
+        self.song_total_sample_ticks = self.db_spectrogram.shape[1]
         self.spectrogram_array_splits = None
 
         self.mel_spectrogram = None
@@ -201,7 +201,11 @@ class Song:
             # find duration by tick length to next action
             df_sus['duration'] = np.abs(df_sus['tick'].diff(periods=-1))
             # extend last action (usually releasing sus_pedal) to end of song
-            df_sus.loc[df_sus.index[-1], 'duration'] = self.song_total_midi_ticks - df_sus.loc[df_sus.index[-1], 'tick']
+            try:
+                df_sus.loc[df_sus.index[-1], 'duration'] = self.song_total_midi_ticks - df_sus.loc[df_sus.index[-1], 'tick']
+            except:
+                print('sus indexing error')
+                pass
 
             # pedal actions record variations in how far the sustain pedal is pressed (i.e. velocity of 20 vs 80)
             # however, sustain pedal is binary, either on or off.  To get the duration where the pedal is pressed
@@ -221,11 +225,6 @@ class Song:
                                         'channel':0, 'control_num': 64, 'velocity': 0, 'duration': 0}, ignore_index=True)
 
                 print('sustain pedal issue')
-                print(df_sus_presses.shape[0])
-                print(df_sus_releases.shape[0])
-                print(df_sus_releases)
-                print(df_sus_presses)
-                print(self.song_total_midi_ticks)
             assert df_sus_presses.shape[0] == df_sus_releases.shape[0], 'assertion error sustain'
             # MIDI tick durations where sustain pedal is pressed
 
@@ -248,7 +247,7 @@ class Song:
         self.midi_note_array = self.midi_note_array[21:109, :]
 
     def downsample_midi_note_array(self):
-        ratio = self.db_spectrogram.shape[1]/self.midi_note_array.shape[1]
+        ratio = self.mel_spectrogram.shape[1]/self.midi_note_array.shape[1]
         # zoom with order=0 uses nearest neighbor approach
         resized_array = zoom(self.midi_note_array, (1, ratio), order=0)
         self.midi_note_array = resized_array
@@ -295,11 +294,25 @@ class Song:
         self.mel_spectrogram = vectorized_db_sigmoid(self.mel_spectrogram)
 
     def downsample_time_dimension(self, factor=0.25):
+        # fig, axs = plt.subplots(2, 1)
+        # axs[0].imshow(self.midi_note_array[:, 100:300], aspect='auto', interpolation='nearest')
+        # axs[1].imshow(self.mel_spectrogram[:, 100:300], aspect='auto', interpolation='nearest')
+        #
+        # fig, axs = plt.subplots(2, 1)
+        # axs[0].imshow(self.midi_note_array[:, 40000:40200], aspect='auto', interpolation='nearest')
+        # axs[1].imshow(self.mel_spectrogram[:, 40000:40200], aspect='auto', interpolation='nearest')
         # zoom with order=0 uses nearest neighbor approach
         resized_midi_array = zoom(self.midi_note_array, (1, factor), order=0)
         self.midi_note_array = resized_midi_array
         resized_audio_array = zoom(self.mel_spectrogram, (1, factor), order=1)
         self.mel_spectrogram = resized_audio_array
+        # axs[0].imshow(self.midi_note_array[:, 100:300], aspect='auto', interpolation='nearest')
+        # axs[1].imshow(self.mel_spectrogram[:, 100:300], aspect='auto', interpolation='nearest')
+        #
+        # fig, axs = plt.subplots(2, 1)
+        # axs[0].imshow(self.midi_note_array[:, 40000:40200], aspect='auto', interpolation='nearest')
+        # axs[1].imshow(self.mel_spectrogram[:, 40000:40200], aspect='auto', interpolation='nearest')
+        # plt.show()
         self.downsampled_midi_ratio *= factor
 
     '''META FUNCTIONS'''
@@ -351,6 +364,16 @@ class Song:
             mel_spectrogram = np.flipud(librosa.feature.melspectrogram(self.audio_waveform, sr=self.sample_rate, n_mels=n_mels))
             log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=np.max)
             self.mel_spectrogram = log_mel_spectrogram
+
+        midi_time = self.midi_note_array.shape[1]*self.tempo/self.PPQ/1000000
+        audio_time = self.mel_spectrogram.shape[1]*512/self.sample_rate
+        time_difference = audio_time - midi_time
+        time_difference_sample_ticks = round(time_difference*self.sample_rate/512)
+        print(time_difference_sample_ticks)
+        if time_difference_sample_ticks > 0:
+            self.mel_spectrogram = self.mel_spectrogram[:, 0:-time_difference_sample_ticks]
+        self.song_total_sample_ticks = self.mel_spectrogram.shape[1]
+
 
     def get_audio_windows_and_midi_slices(self, audio_array, midi_array, stepsize, left_buffer, right_buffer):
         left_indices, right_indices, center_indices = self.get_window_indices(audio_array, stepsize, left_buffer, right_buffer)
@@ -425,8 +448,6 @@ class Song:
             self.remove_velocities_from_midi_note_array()
         if convert_midi_to_pianoroll:
             self.convert_midi_array_to_pianoroll()
-        if downsample:
-            self.downsample_midi_note_array()
 
         # AUDIO FUNCS
         self.process_mel_spectrogram(n_mels, CQT=CQT, VQT=VQT)
@@ -436,6 +457,8 @@ class Song:
             self.apply_denoising_sigmoid(alpha, beta)
 
         # DOWNSAMPLING MIDI AND AUDIO
+        if downsample:
+            self.downsample_midi_note_array()
         if downsample_time_dimension:
             self.downsample_time_dimension(time_dimension_factor)
 
@@ -461,24 +484,17 @@ class Song:
 
         self.prediction_midi_slices = model.predict(self.prediction_audio_windows)
         self.prediction_midi_array = np.column_stack(self.prediction_midi_slices)
-        # # np.set_printoptions(threshold=np.inf)
-        # # print(self.prediction_midi_slices)
-        # np.set_printoptions(threshold=np.inf)
-        # np.set_printoptions(linewidth=200)
-        # np.set_printoptions(suppress=True)
-        # print(self.mel_spectrogram[:, 400:450])
-        # # print(self.prediction_midi_array[:, 400:450])
 
         self.prediction_midi_array[self.prediction_midi_array < 0.5] = 0
         self.prediction_midi_array[self.prediction_midi_array >= 0.5] = 1
-        # fig, axs = plt.subplots(1, 3)
-        # axs[0].imshow(self.midi_note_array, aspect='auto', interpolation='nearest')
-        # axs[1].imshow(self.prediction_midi_array, aspect='auto', interpolation='nearest')
-        # axs[2].imshow(self.mel_spectrogram, aspect='auto', interpolation='nearest')
-        # plt.show()
+        fig, axs = plt.subplots(1, 3)
+        axs[0].imshow(self.midi_note_array, aspect='auto', interpolation='nearest')
+        axs[1].imshow(self.prediction_midi_array, aspect='auto', interpolation='nearest')
+        axs[2].imshow(self.mel_spectrogram, aspect='auto', interpolation='nearest')
+        plt.show()
 
-    def export_midi_prediction_array(self, midi_array, path_out):
-        self.export_midi_array = np.flipud(np.pad(midi_array, ((20,20),(0,0))))
+    def export_midi_prediction_array(self, path_out):
+        self.export_midi_array = np.flipud(np.pad(self.prediction_midi_array, ((20,20),(0,0))))
         self.export_midi_array[self.export_midi_array > 0] = 60
 
         def find_runs(x, row_index):

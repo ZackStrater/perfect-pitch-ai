@@ -4,13 +4,37 @@ import matplotlib.pyplot as plt
 import librosa.display
 import numpy as np
 
-y, sr = librosa.load('/home/zackstrater/audio_midi_repository/testing/test3.wav', sr=None)
+y, sr = librosa.load('/home/zackstrater/DSIclass/capstones/audio-to-midi/data/MIDI-Unprocessed_Chamber2_MID--AUDIO_09_R3_2018_wav--1.wav', sr=None)
 print(sr)
 # x is series with amplitude at each sample
 # sr is number of samples
 
+# fig, ax = plt.subplots()
+# librosa.display.waveplot(y, sr=sr, ax=ax)
+# ax.set_title('Audio Waveform', size=20)
+# ax.set_ylabel('Amplitude', size=15)
+# ax.set_xlabel('Time', size=15)
+# plt.show()
 
-mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=300)
+S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128,
+                                    )
+fig, ax = plt.subplots()
+S_dB = librosa.power_to_db(S, ref=np.max)
+img = librosa.display.specshow(S_dB, x_axis='time',
+                         y_axis='mel', sr=sr,
+                         ax=ax, cmap='viridis')
+fig.colorbar(img, ax=ax, format='%+2.0f dB')
+ax.set_title('Mel-Frequency Spectrogram', size=20)
+ax.set_ylabel('log Hz', size=15)
+ax.set_xlabel('Time', size=15)
+
+plt.show()
+
+
+
+plt.show()
+
+mel_spectrogram = librosa.feature.melspectrogram(y, sr=sr, n_mels=128)
 print(mel_spectrogram)
 log_mel_sprectrogram = librosa.power_to_db(mel_spectrogram)
 
