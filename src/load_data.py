@@ -13,8 +13,8 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/2011-2018_50L_10R/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/2011-2018_50L_10R/audio_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/audio_windows'
 midi_files_bin = []
 audio_files_bin = []
 for filename in sorted(os.listdir(midi_path)):
@@ -43,6 +43,7 @@ df = pd.DataFrame()
 df['filenames'] = audio_files_bin
 note_labels = np.arange(21, 109)
 df[note_labels] = y_train
+print(df)
 
 
 
@@ -64,48 +65,8 @@ train_gen = train_datagen.flow_from_dataframe(df_train, audio_path, x_col='filen
 valid_datagen = ImageDataGenerator(rescale=1./255)
 valid_gen = valid_datagen.flow_from_dataframe(df_test, audio_path, x_col='filenames', y_col=note_labels, batch_size=32,
                                             seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(input_rows,input_columns))
-# test_datagen = ImageDataGenerator(rescale=1./255)
-# test_gen = test_datagen.flow_from_dataframe(df_test, audio_path, x_col='filenames', batch_size=1,
-#                                             seed=42, shuffle=True, class_mode=None, color_mode='grayscale', target_size=(input_rows,input_columns))
 
 
-
-def build_and_train_model(f1, f2, shape1, shape2, dropout=False, batchnorm=False):
-    pass
-    # model = Sequential()
-    # model.add(Conv2D(filters=f1, kernel_size=shape1, padding='same', input_shape=(input_rows, input_columns, 1)))
-    # model.add(Activation('relu'))
-    # if dropout:
-    #     model.add(Dropout(0.2))
-    # if batchnorm:
-    #     model.add(BatchNormalization())
-    # model.add(Conv2D(filters=f2, kernel_size=shape2, padding='valid'))
-    # model.add(Activation('relu'))
-    # if dropout:
-    #     model.add(Dropout(0.2))
-    # if batchnorm:
-    #     model.add(BatchNormalization())
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Conv2D(filters=64, kernel_size=(2, 2), padding='same'))
-    # model.add(Activation('relu'))
-    # if dropout:
-    #     model.add(Dropout(0.2))
-    # if batchnorm:
-    #     model.add(BatchNormalization())
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    # model.add(Flatten())
-    # model.add(Dense(352, activation='relu'))
-    # if dropout:
-    #     model.add(Dropout(0.2))
-    # if batchnorm:
-    #     model.add(BatchNormalization())
-    # model.add(Dense(352, activation='relu'))
-    # model.add(Dense(88, activation='sigmoid'))
-    # model.compile(loss='binary_crossentropy', optimizer='Adam',
-    #               metrics=['accuracy', 'binary_accuracy',
-    #                        tensorflow.keras.metrics.Precision(),
-    #                        tensorflow.keras.metrics.Recall(),
-    #                        ])
 
 model = Sequential()
 model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=64, kernel_size=(3, 3), padding="same", activation="relu"))
@@ -114,14 +75,6 @@ model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Conv2D(filters=128, kernel_size=(3, 3), padding="same", activation="relu"))
 model.add(Conv2D(filters=128, kernel_size=(3, 3), padding="same", activation="relu"))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-# model.add(Conv2D(filters=256, kernel_size=(3, 3), padding="same", activation="relu"))
-# model.add(Conv2D(filters=256, kernel_size=(3, 3), padding="same", activation="relu"))
-# model.add(Conv2D(filters=256, kernel_size=(3, 3), padding="same", activation="relu"))
-# model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-# model.add(Conv2D(filters=512, kernel_size=(3, 3), padding="same", activation="relu"))
-# model.add(Conv2D(filters=512, kernel_size=(3, 3), padding="same", activation="relu"))
-# model.add(Conv2D(filters=512, kernel_size=(3, 3), padding="same", activation="relu"))
-# model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dense(352, activation='relu'))
 model.add(Dense(352, activation='relu'))
 model.add(Dense(88, activation='sigmoid'))
@@ -133,8 +86,6 @@ model.compile(loss='binary_crossentropy', optimizer='Adam',
 model.fit(train_gen, steps_per_epoch=df_train.shape[0]/32, epochs=20, validation_data=valid_gen,
         validation_steps=df_test.shape[0]/32, verbose=1)
 
-
-# build_and_train_model(f1=64, f2=64, shape1=(3, 3), shape2=(3, 3), dropout=False, batchnorm=False)
 
 
 # model.save('../models/sus_128_50l_10r_0,25ds_STEP30')
