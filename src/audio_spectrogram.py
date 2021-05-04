@@ -18,6 +18,15 @@ print(sr)
 
 S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128,
                                     )
+fig, ax = plt.subplots(figsize=(30, 10))
+D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
+img = librosa.display.specshow(D, y_axis='linear', x_axis='time',
+                               sr=sr, ax=ax, cmap='viridis')
+plt.figure(dpi=1200)
+plt.show()
+
+
+
 fig, ax = plt.subplots()
 S_dB = librosa.power_to_db(S, ref=np.max)
 img = librosa.display.specshow(S_dB, x_axis='time',

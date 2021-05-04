@@ -13,8 +13,8 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/2018_50L_10R_0,25ds_sus_step61/audio_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/50L_9R_0,25ds_NOsus_step60/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/50L_9R_0,25ds_NOsus_step60/audio_windows'
 midi_files_bin = []
 audio_files_bin = []
 for filename in sorted(os.listdir(midi_path)):
@@ -36,14 +36,12 @@ for filename in midi_files_bin:
     array = np.load(os.path.join(midi_path, filename))
     y_images.append(array)
 y_train = np.array(y_images)
-# print(y_train.shape)
-# print(y_train[0])
-# print(audio_files_bin)
+
+
 df = pd.DataFrame()
 df['filenames'] = audio_files_bin
 note_labels = np.arange(21, 109)
 df[note_labels] = y_train
-print(df)
 
 
 
@@ -69,12 +67,13 @@ valid_gen = valid_datagen.flow_from_dataframe(df_test, audio_path, x_col='filena
 
 
 model = Sequential()
-model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=64, kernel_size=(3, 3), padding="same", activation="relu"))
-model.add(Conv2D(filters=64, kernel_size=(3, 3), padding="same", activation="relu"))
+model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=48, kernel_size=(3, 3), padding="same", activation="relu"))
+model.add(Conv2D(filters=48, kernel_size=(3, 3), padding="same", activation="relu"))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Conv2D(filters=128, kernel_size=(3, 3), padding="same", activation="relu"))
-model.add(Conv2D(filters=128, kernel_size=(3, 3), padding="same", activation="relu"))
+model.add(Conv2D(filters=96, kernel_size=(3, 3), padding="same", activation="relu"))
+model.add(Conv2D(filters=96, kernel_size=(3, 3), padding="same", activation="relu"))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+model.add(Flatten())
 model.add(Dense(352, activation='relu'))
 model.add(Dense(352, activation='relu'))
 model.add(Dense(88, activation='sigmoid'))
@@ -83,6 +82,8 @@ model.compile(loss='binary_crossentropy', optimizer='Adam',
                        tensorflow.keras.metrics.Precision(),
                        tensorflow.keras.metrics.Recall(),
                        ])
+
+print(model.summary())
 model.fit(train_gen, steps_per_epoch=df_train.shape[0]/32, epochs=20, validation_data=valid_gen,
         validation_steps=df_test.shape[0]/32, verbose=1)
 

@@ -28,9 +28,9 @@ tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 # model = keras.models.load_model('/home/zackstrater/DSIclass/capstones/audio-to-midi/models/test_model')
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/2018_50L_25R_0,25ds_sus_step61/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/2018_50L_25R_0,25ds_sus_step61/audio_windows'
-midi_win_path = '/home/zackstrater/audio_midi_repository/2018_50L_25R_0,25ds_sus_step61/midi_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/2017_50L_10R_0,25ds_sus_step61/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/2017_50L_10R_0,25ds_sus_step61/audio_windows'
+midi_win_path = '/home/zackstrater/audio_midi_repository/2017_50L_10R_0,25ds_sus_step61/midi_windows'
 
 midi_files_bin = []
 audio_files_bin = []
