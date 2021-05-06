@@ -28,9 +28,9 @@ tensorflow.config.experimental.set_memory_growth(gpus[0], True)
 # model = keras.models.load_model('/home/zackstrater/DSIclass/capstones/audio-to-midi/models/test_model')
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/2017_50L_10R_0,25ds_sus_step61/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/2017_50L_10R_0,25ds_sus_step61/audio_windows'
-midi_win_path = '/home/zackstrater/audio_midi_repository/2017_50L_10R_0,25ds_sus_step61/midi_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/200mel_9L_50R_0,25ds_NOsus_step60/right_midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/200mel_9L_50R_0,25ds_NOsus_step60/right_audio_windows'
+midi_win_path = '/home/zackstrater/audio_midi_repository/200mel_9L_50R_0,25ds_NOsus_step60/right_midi_windows'
 
 midi_files_bin = []
 audio_files_bin = []
@@ -81,7 +81,7 @@ for index, row in df.iterrows():
     # print(reshaped_audio_arr.shape)
     # midi_pred = model.predict(reshaped_audio_arr)
     # midi_pred_tile = np.tile(midi_pred, (10, 1)).T.astype('float64')
-    fig, axs = plt.subplots(1, 2, figsize=(15, 20))
+    fig, axs = plt.subplots(1, 3, figsize=(15, 20))
     axs[0].imshow(audio_arr, aspect='auto', interpolation='nearest')
     axs[1].imshow(midi_arr, aspect='auto', interpolation='nearest')
     axs[0].set_title('Audio', size=20)
@@ -92,7 +92,7 @@ for index, row in df.iterrows():
     axs[1].set_title('MIDI', size=20)
     axs[1].set_xlabel('Ticks', size=15)
     axs[1].set_ylabel('Note', size=15)
-
+    axs[2].imshow(midi_tile, aspect='auto', interpolation='nearest')
 
 
     # axs[2].imshow(midi_tile, aspect='auto', interpolation='nearest')

@@ -4,8 +4,8 @@
     <list default="true" id="e1d76b72-71e8-411f-8802-e78330e088ef" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Test.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/Test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/audio_spectrogram.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/audio_spectrogram.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/load_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/load_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/song.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/song.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/split_and_save_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/split_and_save_files.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -50,7 +50,7 @@
       <recent name="$PROJECT_DIR$/data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.split_and_save_files">
+  <component name="RunManager" selected="Python.Test">
     <configuration name="Test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="audio-to-midi" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -305,17 +305,17 @@
     </configuration>
     <list>
       <item itemvalue="Python.Test" />
-      <item itemvalue="Python.load_data" />
-      <item itemvalue="Python.prediction" />
-      <item itemvalue="Python.transfer learning" />
-      <item itemvalue="Python.test3" />
+      <item itemvalue="Python.ableton_split_and_save_files" />
       <item itemvalue="Python.audio_spectrogram" />
       <item itemvalue="Python.cnn" />
+      <item itemvalue="Python.load_data" />
       <item itemvalue="Python.midi_to_csv" />
+      <item itemvalue="Python.prediction" />
       <item itemvalue="Python.song" />
       <item itemvalue="Python.split_and_save_files" />
-      <item itemvalue="Python.ableton_split_and_save_files" />
       <item itemvalue="Python.test2" />
+      <item itemvalue="Python.test3" />
+      <item itemvalue="Python.transfer learning" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

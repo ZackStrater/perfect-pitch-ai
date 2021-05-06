@@ -63,14 +63,21 @@ class Song:
 
     def get_window_indices(self, array, stepsize, left_buffer, right_buffer):
         array_len = array.shape[1]
+        print(left_buffer, right_buffer)
         first_sample = left_buffer
         last_sample = array_len - right_buffer
+        print(first_sample, last_sample)
         center_indices = np.arange(first_sample, last_sample, stepsize)
-
+        print('center indices')
+        print(center_indices)
         def left_right_indices(center, left, right):
             return center - left, center + right + 1
         vec_left_right_indices = np.vectorize(left_right_indices)
         left_indices, right_indices = vec_left_right_indices(center_indices, left_buffer, right_buffer)
+        print('left indices')
+        print(left_indices)
+        print('right_indices')
+        print(right_indices)
         return left_indices, right_indices, center_indices
 
     def get_windows(self, array, left_indicies, right_indicies):
