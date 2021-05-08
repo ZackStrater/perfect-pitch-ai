@@ -13,8 +13,8 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/200mel_9L_50R_0,25ds_NOsus_step60/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/200mel_9L_50R_0,25ds_NOsus_step60/audio_windows'
+midi_path = '/home/zackstrater/audio_midi_repository/200mel_10L_9R_0,25ds_NOsus_step20/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/200mel_10L_9R_0,25ds_NOsus_step20/audio_windows'
 midi_files_bin = []
 audio_files_bin = []
 for filename in sorted(os.listdir(midi_path)):
@@ -53,7 +53,7 @@ print(input_rows, input_columns)
 
 
 df_train, df_test = train_test_split(df, test_size=0.20)
-batch_size=20
+batch_size=96
 
 gpus = tensorflow.config.experimental.list_physical_devices('GPU')
 tensorflow.config.experimental.set_memory_growth(gpus[0], True)
@@ -67,8 +67,8 @@ valid_gen = valid_datagen.flow_from_dataframe(df_test, audio_path, x_col='filena
 
 
 model = Sequential()
-model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=48, kernel_size=(3, 3), padding="same", activation="relu"))
-model.add(Conv2D(filters=48, kernel_size=(3, 3), padding="same", activation="relu"))
+model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=48, kernel_size=(5, 1), padding="same", activation="relu"))
+model.add(Conv2D(filters=48, kernel_size=(3, 1), padding="same", activation="relu"))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Conv2D(filters=96, kernel_size=(3, 3), padding="same", activation="relu"))
 model.add(Conv2D(filters=96, kernel_size=(3, 3), padding="same", activation="relu"))
