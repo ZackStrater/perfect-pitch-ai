@@ -45,36 +45,35 @@ def save_and_split(path_in, midi_out, audio_out, midi_win_out='', save_midi_wind
 
 # complete database processing
 
-midi_out = '/home/zackstrater/audio_midi_repository/200mel_5L_4R_0,25ds_NOsus_step10/midi_slices'
-audio_out = '/home/zackstrater/audio_midi_repository/200mel_5L_4R_0,25ds_NOsus_step10/audio_windows'
+midi_out = '/home/zackstrater/audio_midi_repository/200mel_10L_9R_NOds_NOsus_step20/midi_slices'
+audio_out = '/home/zackstrater/audio_midi_repository/200mel_10L_9R_NOds_NOsus_step20/audio_windows'
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2018'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 print('2018 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2017'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 print('2017 done')
 
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2015'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
-
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 print('2015 done')
 
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2014'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2014 done')
@@ -90,16 +89,16 @@ print('2014 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2011'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2011 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2009'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2009 done')
@@ -113,19 +112,23 @@ print('2009 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2006'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2006 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2004'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=5, right_buffer=4, apply_sus=False, stepsize=10,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=9, apply_sus=False, stepsize=20,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2004 done')
+
+
+
+
 
 
 
@@ -144,36 +147,35 @@ print('2004 done')
 
 # complete database processing
 
-midi_out = '/home/zackstrater/audio_midi_repository/200mel_10L_1R_0,25ds_NOsus_step12/midi_slices'
-audio_out = '/home/zackstrater/audio_midi_repository/200mel_10L_1R_0,25ds_NOsus_step12/audio_windows'
+midi_out = '/home/zackstrater/audio_midi_repository/200mel_20L_19R_NOds_NOsus_step40/midi_slices'
+audio_out = '/home/zackstrater/audio_midi_repository/200mel_20L_19R_NOds_NOsus_step40/audio_windows'
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2018'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 print('2018 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2017'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 print('2017 done')
 
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2015'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
-
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 print('2015 done')
 
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2014'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2014 done')
@@ -189,16 +191,16 @@ print('2014 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2011'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2011 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2009'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2009 done')
@@ -212,32 +214,19 @@ print('2009 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2006'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2006 done')
 
 directory_path = '/media/zackstrater/Samsung_T5/maestro-v3.0.0/2004'
 
-save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=10, right_buffer=1, apply_sus=False, stepsize=12,
-               save_midi_windows=False, midi_win_out='', downsample_time_dimension=True, time_dimension_factor=0.25)
+save_and_split(directory_path, midi_out, audio_out, n_mels=200, left_buffer=20, right_buffer=19, apply_sus=False, stepsize=40,
+               save_midi_windows=False, midi_win_out='', downsample_time_dimension=False, time_dimension_factor=1)
 
 
 print('2004 done')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
