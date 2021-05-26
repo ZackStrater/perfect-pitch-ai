@@ -1,5 +1,5 @@
-## Perfect Pitch AI
-# Using Deep Learning to Transcribe Music From Audio
+# Perfect Pitch AI
+## Using Deep Learning to Transcribe Music From Audio
 
 If you have ever tried learning to learn to play an instrument or even if you've played an instrument your whole life, you will know that one of the most difficult problems for casual musicians have is learning new songs.  Players either must try to learn a song by ear, which is an incredibly difficult task that even for professional musicians, or they must procure a written music, which can often be limited in selection or unreliable.  This project is aimed at helping musicians learn the songs they want to learn using deep learning.  The ultimate goal is an AI product that can "listen" to an audio file and instantly transcribe it into an accurate and accesible form of written music.  
 
@@ -16,6 +16,25 @@ The target data was prepared from the MIDI information (what notes are being pla
 The initial strategy in this project was to take a window of the audio spectrogram (as a grayscale 2D image) and have the model guess just one vertical slice of the MIDI output (i.e. predict what notes are being played during that slice of time).  Each paired set of audio and MIDI files were then cut up into equal sized windows and a slice of the MIDI window was saved as the target data for that audio window.  The length of the audio window could then be adjusted to find the optimal size for the network.  With all the data prepared, we could then proceed to testing the convolutional neural network.
 
 # Results
+
+**Base CNN model:**  
+model = Sequential()  
+model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=filters1, kernel_size=(3, 3), padding="same", activation="relu"))  
+model.add(Conv2D(filters=filters1, kernel_size=(3, 3), padding="same", activation="relu"))  
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))  
+model.add(Conv2D(filters=filters2, kernel_size=(3, 3), padding="same", activation="relu"))  
+model.add(Conv2D(filters=filters2, kernel_size=(3, 3), padding="same", activation="relu"))  
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))  
+model.add(Flatten())  
+model.add(Dense(352, activation='relu'))  
+model.add(Dense(352, activation='relu'))  
+model.add(Dense(88, activation='sigmoid'))  
+model.compile(loss='binary_crossentropy', optimizer='Adam',  
+              metrics=['accuracy', 'binary_accuracy', tensorflow.keras.metrics.Precision(), tensorflow.keras.metrics.Recall()])
+
+
+
+
 
 | Winow Size  | Frames Left | Frames Right  | Modification 1 | Modification 2         | Eval Metrics: | Accuracy | Precision | Recall | F1 Score |
 | ----------- | ----------- | ------------- | -------------- | ---------------        | ---           | -------- | --------- | ------ | -------- |
