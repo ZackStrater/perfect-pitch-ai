@@ -13,8 +13,25 @@ The data for this project comes from the MAESTRO database, a compilation of 200 
 
 The target data was prepared from the MIDI information (what notes are being played at what times).  The result was a 2D array with 88 rows (corresponding to the 88 keys on the piano) where 1 represents a key being pressed at that moment in time and 0 means the key is not being pressed.  Finally the array had to be resized in the X direction in order to make the time ticks equal to the time ticks of the audio spectrogram.
 
-The initial strategy in this project was to take a window of the audio spectrogram (as a grayscale 2D image) and have the model guess just one vertical slice of the MIDI output (i.e. predict what notes are being played during that slice of time).  Each paired set of audio and MIDI files were then cut up into equal sized windows and a slice of the MIDI window was saved as the target data for that audio window.  The length of the audio window could then be adjusted to find the optimal size for the network 
+The initial strategy in this project was to take a window of the audio spectrogram (as a grayscale 2D image) and have the model guess just one vertical slice of the MIDI output (i.e. predict what notes are being played during that slice of time).  Each paired set of audio and MIDI files were then cut up into equal sized windows and a slice of the MIDI window was saved as the target data for that audio window.  The length of the audio window could then be adjusted to find the optimal size for the network.  With all the data prepared, we could then proceed to testing the convolutional neural network.
 
 # Results
+
+| Winow Size  | Frames Left | Frames Right  | Modification 1 | Modification 2         | Eval Metrics: | Accuracy | Precision | Recall | F1 Score |
+| ----------- | ----------- | ------------- | -------------- | ---------------        | ---           | -------- | --------- | ------ | -------- |
+| 60          |         50  |            9  |  128 mels      |              -         |               |    0.33  |     0.64  |   0.44 |     0.52 |
+| 60          |         50  |            9  |   **200 mels** |              -         |               |    0.33  |     0.63  |   0.46 |     0.53 |
+| 60          |         50  |            9  |   200 mels     |**Filters: 96, 96, 48, 48**|            |    0.32  |     0.63  |   0.39 |     0.48 |
+| 60          |         50  |            9  |   200 mels     |**Filters:64, 64, 128, 128**|           |    0.30  |     0.63  |   0.38 |     0.47 |
+| 60          |     **9**   |        **50** |   200 mels     |              -         |               |    0.33  |     0.65  |   0.42 |     0.51 |
+
+| 60          |     **10**  |        **9**  |   200 mels     |              -         |               |    0.36  |     0.71  |   0.47 |     0.57 |
+| 60          |         50  |            9  |   200 mels     |  **Batch Size = 64**   |               |    0.38  |     0.71  |   0.52 |     0.60 |
+| 60          |         50  |            9  |   200 mels     |  **Batch Size = 96**   |               |    0.36  |     0.68  |   0.58 |     0.63 |
+| 10          |     **5**   |       **4**   |   200 mels     |      Batch Size = 96   |               |    0.37  |     0.71  |   0.56 |     0.63 |
+
+
+
+
 
 # Conclusion
