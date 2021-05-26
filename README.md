@@ -32,24 +32,21 @@ model.add(Dense(88, activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='Adam',  
               metrics=['accuracy', 'binary_accuracy', tensorflow.keras.metrics.Precision(), tensorflow.keras.metrics.Recall()])
 
+The CNN model consists of two stacks of two 2D convolution layers followed by a max pooling layer, ultimately ending with two fully connected layers and a final output layer with 88 outputs, which represent the 88 keys on the piano.  Using sigmoid activation for the final layer and binary crossentropy for loss allows the model to perform multilabel predictions.  The performance of the model was tracked mainly using accuracy (which in this case means how often the model perfectly predicts every note for a given output slice), precision (when the model makes a prediction that a note is being pressed, how often is it correct), recall (how many of the total note presses is the model correctly predicting), and f1 score (the harmonic average of precision and recall).  While all of these metrics are important for understanding the performance of the model, the f1 score is probably the most descriptive singularly metric in this multilabel classification problem.
 
+Below are the results from various changes to both the model and the input data:  
+| Entry | Winow Size  | Frames Left | Frames Right  | Modification                  | Evaluation Metrics: | Accuracy | Precision | Recall | F1 Score |
+| ----- | ----------- | ----------- | ------------- | ----------------------------- | ------------------- | -------- | --------- | ------ | -------- |
+| 1     | 60          |         50  |            9  |        **Base Model**         |                     |    0.33  |     0.63  |   0.46 |     0.53 |
+| 2     | 60          |         50  |            9  |   **Filters: 96, 96, 48, 48** |                     |    0.32  |     0.63  |   0.39 |     0.48 |
+| 3     | 60          |         50  |            9  |   **Filters:64, 64, 128, 128**|                     |    0.30  |     0.63  |   0.38 |     0.47 |
+| 4     | 60          |     **9**   |        **50** |             -                 |                     |    0.33  |     0.65  |   0.42 |     0.51 |
+| 5     | 20          |     **10**  |        **9**  |               -               |                     |    0.36  |     0.71  |   0.47 |     0.57 |
+| 6     | 20          |         10  |            9  |    **Batch Size = 64**        |                     |    0.38  |     0.71  |   0.52 |     0.60 |
+| 7     | 20          |         10  |            9  |     **Batch Size = 96**       |                     |    0.36  |     0.68  |   0.58 | **0.63** |
+| 8     | 10          |     **5**   |       **4**   |         Batch Size = 96       |                     |    0.37  |     0.71  |   0.56 |     0.63 |
 
-
-
-| Winow Size  | Frames Left | Frames Right  | Modification 1 | Modification 2         | Eval Metrics: | Accuracy | Precision | Recall | F1 Score |
-| ----------- | ----------- | ------------- | -------------- | ---------------        | ---           | -------- | --------- | ------ | -------- |
-| 60          |         50  |            9  |  128 mels      |              -         |               |    0.33  |     0.64  |   0.44 |     0.52 |
-| 60          |         50  |            9  |   **200 mels** |              -         |               |    0.33  |     0.63  |   0.46 |     0.53 |
-| 60          |         50  |            9  |   200 mels     |**Filters: 96, 96, 48, 48**|            |    0.32  |     0.63  |   0.39 |     0.48 |
-| 60          |         50  |            9  |   200 mels     |**Filters:64, 64, 128, 128**|           |    0.30  |     0.63  |   0.38 |     0.47 |
-| 60          |     **9**   |        **50** |   200 mels     |              -         |               |    0.33  |     0.65  |   0.42 |     0.51 |
-
-| 60          |     **10**  |        **9**  |   200 mels     |              -         |               |    0.36  |     0.71  |   0.47 |     0.57 |
-| 60          |         50  |            9  |   200 mels     |  **Batch Size = 64**   |               |    0.38  |     0.71  |   0.52 |     0.60 |
-| 60          |         50  |            9  |   200 mels     |  **Batch Size = 96**   |               |    0.36  |     0.68  |   0.58 |     0.63 |
-| 10          |     **5**   |       **4**   |   200 mels     |      Batch Size = 96   |               |    0.37  |     0.71  |   0.56 |     0.63 |
-
-
+The results show a number of things to be important to the overall predictivity of the model.  Having more filters or more filters in the earlier convolutional (entries 2-3) layers led to worse results.  Having a greater portion of the audio window occur before or after the slice where it was predicting only had a marginal difference (entry 1 vs 4).  Decreasing the window size from 60 to 20 led to a significant increase in the f1 score (entry 5), which may be due to the fact that making smaller slices means there are a greater number of training examples (3x as many).  However, further decreasing the window size (entry 8) did not afford greater model performance.  Finally, increasing the batch size gave a significant increase in model performance.  The best overall model (entry 7) gave an f1 score of 0.63.
 
 
 
