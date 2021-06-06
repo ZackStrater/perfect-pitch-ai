@@ -57,11 +57,6 @@ def train_model(audio_path, midi_path, epochs=20, batch_size=96, filters1=48, fi
                                                 seed=42, shuffle=True, class_mode='raw', color_mode='grayscale', target_size=(input_rows,input_columns))
 
 
-
-
-
-
-
     model = Sequential()
     model.add(Conv2D(input_shape=(input_rows, input_columns, 1), filters=filters1, kernel_size=(3, 3), padding="same",
                      activation="relu"))
@@ -90,9 +85,9 @@ def train_model(audio_path, midi_path, epochs=20, batch_size=96, filters1=48, fi
 
 
 
-midi_path = '/home/zackstrater/audio_midi_repository/200mel_10L_9R_0,5ds_NOsus_step20/midi_slices'
-audio_path = '/home/zackstrater/audio_midi_repository/200mel_10L_9R_0,5ds_NOsus_step20/audio_windows'
-train_model(audio_path, midi_path, epochs=6, save=True, model_name='200mel_10L_9R_0,5ds_NOsus_step20_epoch6')
+midi_path = '/home/zackstrater/audio_midi_repository/200mel_20L_19R_NOds_NOsus_step40/midi_slices'
+audio_path = '/home/zackstrater/audio_midi_repository/200mel_20L_19R_NOds_NOsus_step40/audio_windows'
+train_model(audio_path, midi_path, epochs=6, save=False, model_name='200mel_10L_9R_NOds_NOsus_step20_epoch6', batch_size=64)
 
 
 

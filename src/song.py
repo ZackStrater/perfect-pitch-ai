@@ -9,7 +9,7 @@ from PIL import Image
 import warnings
 
 class Song:
-    def __init__(self, midi_filepath, audio_filepath):
+    def __init__(self, midi_filepath, audio_filepath, sample_rate=None):
         self.midi_csv_strings = pm.midi_to_csv(midi_filepath)
         self.meta_data = self.midi_csv_strings[0:7]
         self.track_end = self.midi_csv_strings[-2:]
@@ -261,11 +261,6 @@ class Song:
         plt.show()
 
     '''SPECTROGRAM ARRAY FUNCTIONS'''
-    # def convert_waveform_to_spectrogram(self):
-    #     self.raw_spectrogram = librosa.stft(self.audio_waveform)
-    #     self.db_spectrogram = librosa.amplitude_to_db(abs(self.raw_spectrogram))
-
-
     def show_spectrogram(self):
         plt.imshow(self.db_spectrogram, aspect='auto')
         plt.show()
@@ -292,7 +287,7 @@ class Song:
         vectorized_db_sigmoid = np.vectorize(db_sigmoid)
         self.mel_spectrogram = vectorized_db_sigmoid(self.mel_spectrogram)
 
-    def downsample_time_dimension(self, factor=0.25):
+    def downsample_time_dimension(self, factor=0.5):
         # fig, axs = plt.subplots(2, 1)
         # axs[0].imshow(self.midi_note_array[:, 100:300], aspect='auto', interpolation='nearest')
         # axs[1].imshow(self.mel_spectrogram[:, 100:300], aspect='auto', interpolation='nearest')
@@ -314,41 +309,6 @@ class Song:
         # plt.show()
         self.downsampled_midi_ratio *= factor
 
-    '''META FUNCTIONS'''
-    # def split_audio_and_midi_into_equal_partitions(self, time_interval):
-    #     # split audio and downsampled  midi arrays into chunks based of length time_interval (in seconds)
-    #     self.spectrogram_array_splits = self.split_into_intervals(self.db_spectrogram, time_interval, self.sample_rate)
-    #     self.midi_note_array_splits = self.split_into_intervals(self.midi_note_array, time_interval, self.sample_rate)
-    #     assert len(self.spectrogram_array_splits) == len(self.midi_note_array_splits)
-    #
-    # def save_splits(self, midi_directory_path, audio_directory_path, filename=''):
-    #     for i, (midi, audio) in enumerate(zip(self.midi_note_array_splits, self.spectrogram_array_splits)):
-    #         with open(f'{midi_directory_path}/{filename}_midi_{i}.npy', 'wb') as f:
-    #             np.save(f, midi)
-    #         with open(f'{audio_directory_path}/{filename}_audio_{i}.npy', 'wb') as f:
-    #             np.save(f, audio)
-    #
-    # def format_split_save_synced_midi_audio_files(self, midi_directory_path, audio_directory_path, filename='', time_interval=8, spectrogram_freq_ceiling=825,
-    #                                               apply_sus=True, remove_high_frequencies=True, remove_velocity=True, convert_midi_to_pianoroll=True,
-    #                                               downsample=True, apply_denoising=False, alpha=8, beta=4):
-    #     if apply_sus:
-    #         self.populate_midi_note_array()
-    #     else:
-    #         self.populate_midi_note_array(apply_sus=False)
-    #     if remove_high_frequencies:
-    #         self.remove_high_frequencies_from_spectrogram(frequency_ceiling=spectrogram_freq_ceiling)
-    #     if remove_velocity:
-    #         self.remove_velocities_from_midi_note_array()
-    #     if convert_midi_to_pianoroll:
-    #         self.convert_midi_array_to_pianoroll()
-    #     if apply_denoising:
-    #         self.apply_denoising_sigmoid(alpha, beta)
-    #     if downsample:
-    #         self.downsample_midi_note_array()
-    #     self.split_audio_and_midi_into_equal_partitions(time_interval)
-    #     self.save_splits(midi_directory_path, audio_directory_path, filename=filename)
-
-
     '''MEL SPECTROGRAM FORMATTING AND PROCESSING'''
     def process_mel_spectrogram(self, n_mels, CQT=False, VQT=False):
         if CQT:
@@ -366,13 +326,14 @@ class Song:
 
         midi_time = self.midi_note_array.shape[1]*self.tempo/self.PPQ/1000000
         audio_time = self.mel_spectrogram.shape[1]*512/self.sample_rate
+
+        # Fixing audio and midi discrepancy
         time_difference = audio_time - midi_time
         time_difference_sample_ticks = round(time_difference*self.sample_rate/512)
         print(time_difference_sample_ticks)
         if time_difference_sample_ticks > 0:
             self.mel_spectrogram = self.mel_spectrogram[:, 0:-time_difference_sample_ticks]
         self.song_total_sample_ticks = self.mel_spectrogram.shape[1]
-
 
     def get_audio_windows_and_midi_slices(self, audio_array, midi_array, stepsize, left_buffer, right_buffer):
         left_indices, right_indices, center_indices = self.get_window_indices(audio_array, stepsize, left_buffer, right_buffer)
@@ -393,7 +354,7 @@ class Song:
                     im = Image.fromarray((audio*255).astype(np.uint8))
                     im.save(f)
 
-                with open(f'{midi_window_directory_path}/{filename}_mwin_{i}.{file_format}', 'wb') as f:
+                with open(f'{midi_window_directory_path}/{filename}_midiwin_{i}.{file_format}', 'wb') as f:
                     im = Image.fromarray((midi_win*255).astype(np.uint8))
                     im.save(f)
 
@@ -405,29 +366,6 @@ class Song:
                 with open(f'{audio_directory_path}/{filename}_audio_{i}.{file_format}', 'wb') as f:
                     im = Image.fromarray((audio*255).astype(np.uint8))
                     im.save(f)
-
-    # def save_audio_windows_midi_splits(self, midi_directory_path, audio_directory_path, filename='', save_midi_windows=False, midi_window_directory_path=''):
-    #     if save_midi_windows:
-    #         with open(f'{midi_directory_path}/{filename}_midi.npy', 'wb') as f:
-    #             print(np.array(self.midi_slices).shape)
-    #             np.save(f, np.array(self.midi_slices))
-    #             print('saved midi slice')
-    #         with open(f'{audio_directory_path}/{filename}_audio.npy', 'wb') as f:
-    #             print(np.array(self.mel_windows).shape)
-    #             np.save(f, np.array(self.mel_windows))
-    #             print('saved audio window')
-    #
-    #         with open(f'{midi_window_directory_path}/{filename}_mwin.npy', 'wb') as f:
-    #             print(np.array(self.midi_windows).shape)
-    #             np.save(f, np.array(self.midi_windows))
-    #             print('saved midi_windows')
-    #
-    #     else:
-    #         with open(f'{midi_directory_path}/{filename}_midi.npy', 'wb') as f:
-    #             np.save(f, np.array(self.midi_slices))
-    #         with open(f'{audio_directory_path}/{filename}_audio.npy', 'wb') as f:
-    #             np.save(f, np.array(self.mel_windows))
-
 
     def process_audio_midi_save_slices(self,
                                        midi_directory_path, audio_directory_path, # path info
@@ -472,6 +410,7 @@ class Song:
                                                 file_format=file_format)
 
 
+    '''PREDICTIONS'''
     def make_predictions(self, model, left_buffer, right_buffer):
         self.prediction_audio_array = np.pad(self.mel_spectrogram, ((0, 0), (left_buffer, right_buffer)))
         left_indicies, right_indices, center_indices = self.get_window_indices(self.prediction_audio_array, 1, left_buffer, right_buffer)
